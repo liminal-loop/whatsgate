@@ -12,8 +12,7 @@ const postgresDataSource = new DataSource({
   password: process.env.DATABASE_PASSWORD,
   database: process.env.DATABASE_NAME || 'whatsgate',
   entities: [__dirname + '/../**/*.entity{.ts,.js}'],
-  migrations: [__dirname + '/migrations/*{.ts,.js}'],
-  synchronize: false, // Never auto-sync in production
+  synchronize: process.env.DATABASE_SYNCHRONIZE === 'true',
   logging: process.env.DATABASE_LOGGING === 'true',
   ssl:
     process.env.DATABASE_SSL === 'true'

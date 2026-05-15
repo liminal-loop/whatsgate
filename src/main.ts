@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import helmet from 'helmet';
+import type { Express } from 'express';
 import { AppModule } from './app.module';
 import { ShutdownService } from './common/services/shutdown.service';
 import * as dotenv from 'dotenv';
@@ -66,6 +67,26 @@ STORAGE_PATH=./data/media
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  // Configure Express trust proxy only when explicitly requested.
+  // This avoids accidental trust of client-supplied forwarding headers.
+  const trustProxyRaw = process.env.TRUST_PROXY?.trim();
+  if (trustProxyRaw) {
+    let trustProxyValue: boolean | number | string;
+    const normalized = trustProxyRaw.toLowerCase();
+    if (normalized === 'true') {
+      trustProxyValue = true;
+    } else if (normalized === 'false') {
+      trustProxyValue = false;
+    } else if (/^\d+$/.test(trustProxyRaw)) {
+      trustProxyValue = parseInt(trustProxyRaw, 10);
+    } else {
+      trustProxyValue = trustProxyRaw;
+    }
+
+    const expressApp = app.getHttpAdapter().getInstance() as Express;
+    expressApp.set('trust proxy', trustProxyValue);
+  }
 
   // Enable shutdown hooks for graceful shutdown
   app.enableShutdownHooks();

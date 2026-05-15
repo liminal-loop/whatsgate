@@ -1,10 +1,10 @@
 # WhatsGate Copilot Instructions
 
-WhatsGate is a NestJS 11 + TypeScript WhatsApp API gateway with modular architecture and pluggable adapters.
+WhatsGate is a NestJS 11 + TypeScript WhatsApp API gateway with modular architecture and PostgreSQL as the primary data store.
 
 ## Runtime and Tooling
 
-- Use Node.js 22 for local and CI parity.
+- Use Node.js 26 for local and CI parity.
 - Install dependencies with `npm ci` (preferred) or `npm install`.
 - Main development command: `npm run start:dev`.
 - Build command: `npm run build`.
@@ -18,7 +18,7 @@ WhatsGate is a NestJS 11 + TypeScript WhatsApp API gateway with modular architec
 - Root module: `src/app.module.ts`.
 - Feature modules are under `src/modules/`.
 - Shared infrastructure is under `src/common/` and `src/core/`.
-- Database and migrations are under `src/database/`.
+- Database configuration is under `src/database/`.
 - SDKs are in `sdk/javascript/` and `sdk/python/`.
 - Documentation source is in `docs/`.
 
@@ -28,7 +28,7 @@ WhatsGate is a NestJS 11 + TypeScript WhatsApp API gateway with modular architec
 - Reuse shared services/utilities before adding new abstractions.
 - Keep TypeScript strictness and NestJS patterns consistent with existing code.
 - Prefer minimal, targeted changes over broad refactors unless explicitly requested.
-- For DB schema changes, add TypeORM migrations in `src/database/migrations/`.
+- For DB schema changes in this v1 phase, keep TypeORM synchronize-based schema management aligned with entities and configuration.
 
 ## Validation Expectations Before Finalizing
 

@@ -222,6 +222,30 @@ describe('AuthService', () => {
       await expect(service.validateApiKey('ip-restricted', '192.168.1.1')).rejects.toThrow('IP address not allowed');
     });
 
+    it('should fail closed when key has allowlist but client IP is missing', async () => {
+      const key = createMockApiKey({
+        allowedIps: ['10.0.0.1'],
+        keyHash: hashKey('ip-missing'),
+      });
+      (repository.findOne as jest.Mock).mockResolvedValue(key);
+
+      await expect(service.validateApiKey('ip-missing')).rejects.toThrow(
+        'Client IP is required for restricted API key',
+      );
+    });
+
+    it('should fail closed when key has allowlist but client IP is blank', async () => {
+      const key = createMockApiKey({
+        allowedIps: ['10.0.0.1'],
+        keyHash: hashKey('ip-blank'),
+      });
+      (repository.findOne as jest.Mock).mockResolvedValue(key);
+
+      await expect(service.validateApiKey('ip-blank', '   ')).rejects.toThrow(
+        'Client IP is required for restricted API key',
+      );
+    });
+
     it('should pass when client IP matches allowed IPs', async () => {
       const key = createMockApiKey({
         allowedIps: ['10.0.0.1'],
@@ -334,6 +358,62 @@ describe('AuthService', () => {
       // CIDR match
       const r2 = await service.validateApiKey('mixed', '192.168.50.1');
       expect(r2.id).toBe(key.id);
+    });
+
+    it('should reject invalid IPv4 client input', async () => {
+      const key = createMockApiKey({
+        allowedIps: ['192.168.1.0/24'],
+        keyHash: hashKey('bad-ipv4'),
+      });
+      (repository.findOne as jest.Mock).mockResolvedValue(key);
+
+      await expect(service.validateApiKey('bad-ipv4', '999.168.1.10')).rejects.toThrow('IP address not allowed');
+    });
+
+    it('should reject malformed CIDR entries', async () => {
+      const key = createMockApiKey({
+        allowedIps: ['10.0.0.0/33'],
+        keyHash: hashKey('bad-cidr'),
+      });
+      (repository.findOne as jest.Mock).mockResolvedValue(key);
+
+      await expect(service.validateApiKey('bad-cidr', '10.0.0.1')).rejects.toThrow('IP address not allowed');
+    });
+  });
+
+  describe('onModuleInit', () => {
+    it('should seed a random initial key when no keys exist', async () => {
+      (repository.count as jest.Mock).mockResolvedValue(0);
+      (repository.create as jest.Mock).mockImplementation((v: unknown) => v as ApiKey);
+      (repository.save as jest.Mock).mockImplementation(v => Promise.resolve(v as ApiKey));
+
+      await service.onModuleInit();
+
+      const createCalls = (repository.create as jest.Mock).mock.calls as Array<
+        [
+          {
+            keyHash: string;
+            keyPrefix: string;
+          },
+        ]
+      >;
+      const savedEntity = createCalls[0]?.[0] as
+        | {
+            keyHash: string;
+            keyPrefix: string;
+          }
+        | undefined;
+
+      expect(savedEntity).toBeDefined();
+      if (!savedEntity) {
+        throw new Error('Expected repository.create to be called for seed key');
+      }
+
+      const seededEntity = savedEntity;
+
+      expect(seededEntity.keyHash).not.toBe(hashKey('dev-admin-key'));
+      expect(seededEntity.keyPrefix).not.toBe('dev-admin-ke');
+      expect(seededEntity.keyPrefix).toMatch(/^owa_k1_/);
     });
   });
 });

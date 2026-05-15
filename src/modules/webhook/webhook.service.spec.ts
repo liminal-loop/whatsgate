@@ -402,6 +402,83 @@ describe('WebhookService', () => {
           backoff: expect.objectContaining({ type: 'exponential' }),
         }),
       );
+
+      expect(hookManager.execute).toHaveBeenCalledWith(
+        'webhook:queued',
+        expect.objectContaining({ sessionId: 'sess-1', event: 'message.received', webhookId: 'wh-uuid-1' }),
+        expect.objectContaining({ sessionId: 'sess-1', source: 'WebhookService' }),
+      );
+    });
+
+    it('should execute webhook:error hook when queue add fails', async () => {
+      const queueModule: TestingModule = await Test.createTestingModule({
+        providers: [
+          WebhookService,
+          { provide: getRepositoryToken(Webhook, 'data'), useValue: repository },
+          {
+            provide: ConfigService,
+            useValue: {
+              get: jest.fn().mockImplementation(<T>(key: string, def?: T): T | boolean | number => {
+                if (key === 'queue.enabled') return true;
+                if (key === 'webhook.retryDelay') return 5000;
+                return def as T;
+              }),
+            },
+          },
+          { provide: HookManager, useValue: hookManager },
+          {
+            provide: getQueueToken(QUEUE_NAMES.WEBHOOK),
+            useValue: { add: jest.fn().mockRejectedValue(new Error('redis unavailable')) },
+          },
+        ],
+      }).compile();
+
+      const queueService = queueModule.get<WebhookService>(WebhookService);
+
+      const webhook = createMockWebhook({ events: ['message.received'] });
+      (repository.find as jest.Mock).mockResolvedValue([webhook]);
+      (hookManager.execute as jest.Mock).mockResolvedValue({
+        continue: true,
+        data: {
+          sessionId: 'sess-1',
+          event: 'message.received',
+          payload: {
+            event: 'message.received',
+            data: {},
+            timestamp: '',
+            sessionId: 'sess-1',
+            idempotencyKey: 'k',
+            deliveryId: 'd',
+          },
+        },
+      });
+
+      await queueService.dispatch('sess-1', 'message.received', {});
+
+      const hookCalls = (hookManager.execute as jest.Mock).mock.calls as Array<[string, unknown, unknown]>;
+      const errorHookCall = hookCalls.find(call => call[0] === 'webhook:error') as
+        | [
+            string,
+            {
+              sessionId: string;
+              event: string;
+              webhookId: string;
+              error: string;
+            },
+            { sessionId: string; source: string },
+          ]
+        | undefined;
+
+      expect(errorHookCall).toBeDefined();
+      if (!errorHookCall) {
+        throw new Error('Expected webhook:error hook call for queue failure');
+      }
+
+      expect(errorHookCall[1].sessionId).toBe('sess-1');
+      expect(errorHookCall[1].event).toBe('message.received');
+      expect(errorHookCall[1].webhookId).toBe('wh-uuid-1');
+      expect(errorHookCall[1].error).toContain('Queue failed:');
+      expect(errorHookCall[2]).toEqual(expect.objectContaining({ sessionId: 'sess-1', source: 'WebhookService' }));
     });
   });
 });

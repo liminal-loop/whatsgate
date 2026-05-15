@@ -26,9 +26,8 @@ export class AuthService implements OnModuleInit {
     let isNewKey = false;
 
     if (count === 0) {
-      // Use predictable key in development, random key in production
-      displayKey =
-        process.env.NODE_ENV === 'production' ? `owa_k1_${randomBytes(32).toString('hex')}` : 'dev-admin-key';
+      // Always generate a cryptographically secure initial key.
+      displayKey = `owa_k1_${randomBytes(32).toString('hex')}`;
 
       await this.seedApiKey(displayKey, 'Default Admin Key', ApiKeyRole.ADMIN);
       isNewKey = true;
@@ -171,9 +170,15 @@ export class AuthService implements OnModuleInit {
       throw new UnauthorizedException('API key has expired');
     }
 
-    // Check IP whitelist
-    if (apiKey.allowedIps && apiKey.allowedIps.length > 0 && clientIp) {
-      if (!this.isIpAllowed(clientIp, apiKey.allowedIps)) {
+    // Check IP whitelist (fail-closed when key is IP-restricted)
+    if (apiKey.allowedIps && apiKey.allowedIps.length > 0) {
+      const normalizedClientIp = clientIp?.trim() ?? '';
+
+      if (!normalizedClientIp) {
+        throw new UnauthorizedException('Client IP is required for restricted API key');
+      }
+
+      if (!this.isIpAllowed(normalizedClientIp, apiKey.allowedIps)) {
         this.logger.warn(`IP not allowed: ${clientIp}`, {
           keyId: apiKey.id,
           action: 'ip_rejected',
@@ -225,33 +230,55 @@ export class AuthService implements OnModuleInit {
    * @param cidr - CIDR notation (e.g., "192.168.1.0/24")
    */
   private ipInCidr(ip: string, cidr: string): boolean {
-    try {
-      const [range, bitsStr] = cidr.split('/');
-      const bits = parseInt(bitsStr, 10);
-
-      if (isNaN(bits) || bits < 0 || bits > 32) {
-        return false;
-      }
-
-      const mask = ~(2 ** (32 - bits) - 1);
-      const ipNum = this.ipToNumber(ip);
-      const rangeNum = this.ipToNumber(range);
-
-      return (ipNum & mask) === (rangeNum & mask);
-    } catch (error) {
-      this.logger.warn(`Invalid CIDR format: ${cidr}`, { error: String(error) });
+    const [range, bitsStr, ...extra] = cidr.split('/');
+    if (!range || bitsStr === undefined || extra.length > 0) {
       return false;
     }
+
+    if (!/^\d{1,2}$|^3[0-2]$/.test(bitsStr)) {
+      return false;
+    }
+
+    const bits = parseInt(bitsStr, 10);
+    if (bits < 0 || bits > 32) {
+      return false;
+    }
+
+    const ipNum = this.ipToNumber(ip);
+    const rangeNum = this.ipToNumber(range);
+
+    if (ipNum === null || rangeNum === null) {
+      return false;
+    }
+
+    const mask = bits === 0 ? 0 : (0xffffffff << (32 - bits)) >>> 0;
+    return (ipNum & mask) === (rangeNum & mask);
   }
 
   /**
    * Convert IPv4 address string to 32-bit number
    */
-  private ipToNumber(ip: string): number {
-    const parts = ip.split('.');
-    if (parts.length !== 4) return 0;
+  private ipToNumber(ip: string): number | null {
+    const parts = ip.trim().split('.');
+    if (parts.length !== 4) {
+      return null;
+    }
 
-    return parts.reduce((acc, octet) => (acc << 8) + parseInt(octet, 10), 0) >>> 0;
+    const octets: number[] = [];
+    for (const part of parts) {
+      if (!/^\d{1,3}$/.test(part)) {
+        return null;
+      }
+
+      const value = parseInt(part, 10);
+      if (value < 0 || value > 255) {
+        return null;
+      }
+
+      octets.push(value);
+    }
+
+    return octets.reduce((acc, octet) => (acc << 8) + octet, 0) >>> 0;
   }
 
   hasPermission(apiKey: ApiKey, requiredRole: ApiKeyRole): boolean {

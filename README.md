@@ -22,7 +22,7 @@
 <p align="center">
   <img src="https://img.shields.io/badge/version-0.1.5-blue.svg" alt="Version"/>
   <img src="https://img.shields.io/badge/license-MIT-green.svg" alt="License"/>
-  <img src="https://img.shields.io/badge/node-22_LTS-brightgreen.svg" alt="Node"/>
+  <img src="https://img.shields.io/badge/node-26-current-brightgreen.svg" alt="Node"/>
   <img src="https://img.shields.io/badge/NestJS-11.x-red.svg" alt="NestJS"/>
   <img src="https://img.shields.io/badge/self--hosted-ready-brightgreen.svg" alt="Self-Hosted"/>
   <img src="https://img.shields.io/badge/TypeScript-5.x-3178C6.svg" alt="TypeScript"/>
@@ -85,7 +85,7 @@ Built on a modular architecture, WhatsGate uses **PostgreSQL as the single sourc
 | Redis Cache      | ✅     | Optional performance caching   |
 | S3 Storage       | ✅     | Scalable media storage         |
 | Health Checks    | ✅     | Kubernetes-ready probes        |
-| Data Migration   | ✅     | Export/import utilities for operations |
+| Schema Sync      | ✅     | Automatic schema synchronization for v1 |
 
 ---
 
@@ -102,6 +102,7 @@ npm ci
 # Copy and configure environment
 cp .env.example .env
 # Edit .env with your settings
+# For v1 initialization ensure DATABASE_SYNCHRONIZE=true
 
 # Start the API
 npm run dev
@@ -201,7 +202,7 @@ curl -X POST http://localhost:2785/api/sessions/{sessionId}/webhooks \
 
 | Layer         | Technology              |
 | ------------- | ----------------------- |
-| **Runtime**   | Node.js 22 LTS          |
+| **Runtime**   | Node.js 26              |
 | **Framework** | NestJS 11.x             |
 | **Language**  | TypeScript 5.x          |
 | **WA Engine** | whatsapp-web.js         |
@@ -254,10 +255,10 @@ Comprehensive documentation is available in the `docs/` folder:
 | [Requirements](./docs/02-requirements-specification.md) | Feature specifications       |
 | [Architecture](./docs/03-system-architecture.md)        | System design                |
 | [Security](./docs/04-security-design.md)                | Security implementation      |
-| [Database](./docs/05-database-design.md)                | Data models and migrations   |
+| [Database](./docs/05-database-design.md)                | Data models and schema synchronization |
 | [API Spec](./docs/06-api-specification.md)              | Complete API reference       |
 | [Development](./docs/08-development-guidelines.md)      | Coding standards             |
-| [Migration Guide](./docs/14-migration-guide.md)         | Database & storage migration |
+| [Troubleshooting](./docs/12-troubleshooting-faq.md)     | Diagnostics and FAQs         |
 
 ---
 

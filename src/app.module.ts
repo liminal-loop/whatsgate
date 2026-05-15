@@ -58,9 +58,7 @@ if (process.env.QUEUE_ENABLED === 'true') {
         password: configService.get<string>('database.password', ''),
         database: configService.get<string>('database.database', 'whatsgate'),
         entities: [__dirname + '/modules/auth/**/*.entity{.ts,.js}', __dirname + '/modules/audit/**/*.entity{.ts,.js}'],
-        migrations: [__dirname + '/database/migrations/*{.ts,.js}'],
-        synchronize: configService.get<boolean>('database.synchronize', false),
-        migrationsRun: true,
+        synchronize: configService.get<boolean>('database.synchronize', true),
         logging: configService.get<boolean>('database.logging', false),
         ssl: configService.get<boolean>('database.ssl', false)
           ? {
@@ -87,11 +85,9 @@ if (process.env.QUEUE_ENABLED === 'true') {
           __dirname + '/modules/webhook/**/*.entity{.ts,.js}',
           __dirname + '/modules/message/**/*.entity{.ts,.js}',
         ],
-        migrations: [__dirname + '/database/migrations/*{.ts,.js}'],
         logging: configService.get<boolean>('database.logging', false),
-        // Never auto-sync Postgres in production; rely on migrations.
-        synchronize: configService.get<boolean>('database.synchronize', false),
-        migrationsRun: false,
+        // v1 optimization: auto-sync schema instead of migration strategy.
+        synchronize: configService.get<boolean>('database.synchronize', true),
         retryAttempts: 10,
         retryDelay: 3000,
         ssl: configService.get<boolean>('database.ssl', false)

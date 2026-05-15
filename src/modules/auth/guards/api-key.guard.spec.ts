@@ -26,12 +26,14 @@ function createMockApiKey(overrides: Partial<ApiKey> = {}): ApiKey {
 function createMockContext(
   headers: Record<string, string> = {},
   params: Record<string, string> = {},
+  requestOverrides: Partial<{ ip: string; socket: { remoteAddress: string } }> = {},
 ): ExecutionContext {
   const request = {
     headers,
     params,
     ip: '127.0.0.1',
     socket: { remoteAddress: '127.0.0.1' },
+    ...requestOverrides,
   };
 
   return {
@@ -144,7 +146,7 @@ describe('ApiKeyGuard', () => {
     expect(authService.validateApiKey).toHaveBeenCalledWith('key', '127.0.0.1', 'sess-123');
   });
 
-  it('should extract client IP from X-Forwarded-For header', async () => {
+  it('should ignore X-Forwarded-For and use resolved request IP', async () => {
     reflector.getAllAndOverride.mockReturnValueOnce(false).mockReturnValueOnce(undefined);
 
     const apiKey = createMockApiKey();
@@ -156,6 +158,19 @@ describe('ApiKeyGuard', () => {
     });
     await guard.canActivate(context);
 
-    expect(authService.validateApiKey).toHaveBeenCalledWith('key', '203.0.113.50', undefined);
+    expect(authService.validateApiKey).toHaveBeenCalledWith('key', '127.0.0.1', undefined);
+  });
+
+  it('should normalize IPv4-mapped IPv6 addresses', async () => {
+    reflector.getAllAndOverride.mockReturnValueOnce(false).mockReturnValueOnce(undefined);
+
+    const apiKey = createMockApiKey();
+    (authService.validateApiKey as jest.Mock).mockResolvedValue(apiKey);
+
+    const context = createMockContext({ 'x-api-key': 'key' }, {}, { ip: '::ffff:10.0.0.5' });
+
+    await guard.canActivate(context);
+
+    expect(authService.validateApiKey).toHaveBeenCalledWith('key', '10.0.0.5', undefined);
   });
 });
