@@ -187,9 +187,15 @@ export class AuthService implements OnModuleInit {
       }
     }
 
-    // Check session restriction
-    if (apiKey.allowedSessions && apiKey.allowedSessions.length > 0 && sessionId) {
-      if (!apiKey.allowedSessions.includes(sessionId)) {
+    // Check session restriction (fail-closed for restricted keys)
+    if (apiKey.allowedSessions && apiKey.allowedSessions.length > 0) {
+      const normalizedSessionId = sessionId?.trim() ?? '';
+
+      if (!normalizedSessionId) {
+        throw new UnauthorizedException('Session ID is required for restricted API key');
+      }
+
+      if (!apiKey.allowedSessions.includes(normalizedSessionId)) {
         throw new UnauthorizedException('API key not authorized for this session');
       }
     }

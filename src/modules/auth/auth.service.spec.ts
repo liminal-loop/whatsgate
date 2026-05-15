@@ -269,6 +269,42 @@ describe('AuthService', () => {
         'API key not authorized for this session',
       );
     });
+
+    it('should fail closed when key has session allowlist but sessionId is missing', async () => {
+      const key = createMockApiKey({
+        allowedSessions: ['session-A'],
+        keyHash: hashKey('sess-missing'),
+      });
+      (repository.findOne as jest.Mock).mockResolvedValue(key);
+
+      await expect(service.validateApiKey('sess-missing')).rejects.toThrow(
+        'Session ID is required for restricted API key',
+      );
+    });
+
+    it('should fail closed when key has session allowlist but sessionId is blank', async () => {
+      const key = createMockApiKey({
+        allowedSessions: ['session-A'],
+        keyHash: hashKey('sess-blank'),
+      });
+      (repository.findOne as jest.Mock).mockResolvedValue(key);
+
+      await expect(service.validateApiKey('sess-blank', undefined, '   ')).rejects.toThrow(
+        'Session ID is required for restricted API key',
+      );
+    });
+
+    it('should allow request when restricted key session matches', async () => {
+      const key = createMockApiKey({
+        allowedSessions: ['session-A'],
+        keyHash: hashKey('sess-ok'),
+      });
+      (repository.findOne as jest.Mock).mockResolvedValue(key);
+      (repository.save as jest.Mock).mockImplementation(k => Promise.resolve(k));
+
+      const result = await service.validateApiKey('sess-ok', undefined, 'session-A');
+      expect(result.id).toBe(key.id);
+    });
   });
 
   // ── hasPermission ─────────────────────────────────────────────────
