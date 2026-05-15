@@ -74,8 +74,11 @@ Built on a modular architecture, WhatsGate uses **PostgreSQL as the single sourc
 | Labels Management   | ✅     | Organize chats with labels         |
 | Proxy Support       | ✅     | Per-session proxy configuration    |
 | Rate Limiting       | ✅     | Configurable request limits        |
-| CIDR Whitelisting   | ✅     | IP-based access control            |
+| IP Allowlisting     | ✅     | CIDR-based access control (fail-closed) |
+| Session-Scoped Keys | ✅     | Restrict API keys to specific sessions  |
 | Audit Logging       | ✅     | Track all API operations           |
+| TypeScript SDK      | 🔄     | Preview — source in `sdk/javascript/` |
+| Python SDK          | 🔄     | Preview — source in `sdk/python/`     |
 
 ### Infrastructure
 
@@ -204,8 +207,8 @@ curl -X POST http://localhost:2785/api/sessions/{sessionId}/webhooks \
 | ------------- | ----------------------- |
 | **Runtime**   | Node.js 26              |
 | **Framework** | NestJS 11.x             |
-| **Language**  | TypeScript 5.x          |
-| **WA Engine** | whatsapp-web.js         |
+| **Language**  | TypeScript 5.9.x        |
+| **WA Engine** | whatsapp-web.js 1.34.x  |
 | **Database**  | PostgreSQL (single source of truth) |
 | **Cache**     | Redis (optional)        |
 | **Storage**   | Local / S3              |

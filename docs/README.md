@@ -16,9 +16,9 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-0.1.0-blue.svg" alt="Version"/>
+  <img src="https://img.shields.io/badge/version-0.1.5-blue.svg" alt="Version"/>
   <img src="https://img.shields.io/badge/license-MIT-green.svg" alt="License"/>
-  <img src="https://img.shields.io/badge/node-20_LTS-brightgreen.svg" alt="Node"/>
+  <img src="https://img.shields.io/badge/node-26-brightgreen.svg" alt="Node"/>
   <img src="https://img.shields.io/badge/NestJS-11.x-red.svg" alt="NestJS"/>
   <img src="https://img.shields.io/badge/docker-ready-blue.svg" alt="Docker"/>
   <img src="https://img.shields.io/badge/TypeScript-5.x-3178C6.svg" alt="TypeScript"/>
@@ -49,7 +49,7 @@
 | 15  | [Project Roadmap](./15-project-roadmap.md)                       | Near-term and long-term roadmap                   |
 | 16  | [Risk Management](./16-risk-management.md)                       | Risks and mitigations                             |
 | 17  | [Dashboard Design](./17-dashboard-design.md)                     | Dashboard UX overview                             |
-| 18  | [SDK Design](./18-sdk-design.md)                                 | SDK plans and conventions                         |
+| 18  | [SDK Design](./18-sdk-design.md)                                 | SDK design and v1 preview availability            |
 | 19  | [Plugin Architecture](./19-plugin-architecture.md)               | Extensibility concepts                            |
 | 20  | [Community Guidelines](./20-community-guidelines.md)             | Contribution and governance                       |
 | 21  | [Glossary](./21-glossary.md)                                     | Terms and definitions                             |
@@ -65,8 +65,8 @@ git clone https://github.com/rmyndharis/whatsgate.git
 cd whatsgate
 
 # Install & configure
-npm install
-cp .env.minimal .env
+npm ci
+cp .env.example .env
 
 # Create data directories
 mkdir -p data/sessions data/media
@@ -101,11 +101,7 @@ Access:
 
 ### API Key
 
-WhatsGate seeds a default API key on first run and writes it to:
-
-- `data/.api-key` (development)
-
-You can also create new keys via the API (see [API Specification](./06-api-specification.md)).
+WhatsGate generates a cryptographically-random API key on first run and prints it to the application log. Retrieve it from the startup output or create additional keys via the API (see [API Specification](./06-api-specification.md)).
 
 ## API Example
 
@@ -169,24 +165,26 @@ socket.on('message', msg => {
 | Webhooks with HMAC Signature    | Ready                         |
 | PostgreSQL Storage              | Ready                         |
 | API Key Authentication & Roles  | Ready                         |
-| CIDR IP Whitelisting            | Ready                         |
+| Session-Scoped API Keys         | Ready (fail-closed)           |
+| CIDR IP Allowlisting            | Ready (fail-closed)           |
 | Rate Limiting                   | Ready                         |
 | Audit Logging                   | Ready                         |
 | Groups / Contacts / Labels API  | Ready                         |
 | Channels / Status / Catalog API | Experimental (engine-limited) |
 | Queue-based Webhook Retries     | Optional (QUEUE_ENABLED=true) |
+| TypeScript/Python SDKs          | Preview (source in repository)|
 
 ## Tech Stack
 
 | Layer     | Technology                    |
 | --------- | ----------------------------- |
-| Runtime   | Node.js 20 LTS                |
+| Runtime   | Node.js 26                    |
 | Framework | NestJS 11.x                   |
-| Language  | TypeScript 5.x                |
-| WA Engine | whatsapp-web.js               |
+| Language  | TypeScript 5.9.x              |
+| WA Engine | whatsapp-web.js 1.34.x        |
 | WebSocket | Socket.IO                     |
-| Database  | PostgreSQL |
-| ORM       | TypeORM                       |
+| Database  | PostgreSQL                    |
+| ORM       | TypeORM (synchronize, v1)     |
 | Container | Docker + Docker Compose       |
 | Dashboard | React + Vite + TanStack Query |
 
@@ -195,11 +193,10 @@ socket.on('message', msg => {
 ```
 WhatsGate/
 ├── src/                    # Backend source code
-├── dashboard/              # Frontend dashboard
-├── docker-compose.yml      # Traefik + API + Dashboard
-├── docker-compose.dev.yml  # Dev-only compose
-├── docs/                  # Project documentation
-└── data/                   # Local runtime data (sessions, media, api key)
+├── sdk/                    # Official SDKs (JS/TS and Python preview)
+├── docs/                   # Project documentation
+├── scripts/                # Shell and bootstrap scripts
+└── test/                   # E2E tests and test configuration
 ```
 
 ## Contributing

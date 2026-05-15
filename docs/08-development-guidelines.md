@@ -712,8 +712,8 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
 ```bash
 # Required
-- Node.js 20 LTS
-- npm 10+
+- Node.js 26
+- npm 11+
 - Docker & Docker Compose
 - Git
 
@@ -731,7 +731,7 @@ git clone https://github.com/rmyndharis/WhatsGate.git
 cd whatsgate
 
 # 2. Install dependencies
-npm install
+npm ci
 
 # 3. Copy environment file
 cp .env.example .env
@@ -739,10 +739,7 @@ cp .env.example .env
 # 4. Start infrastructure services
 docker compose up -d postgres redis
 
-# 5. Run database migrations
-npm run migration:run
-
-# 6. Start development server
+# 5. Start development server
 npm run start:dev
 ```
 

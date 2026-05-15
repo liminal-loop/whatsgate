@@ -1578,14 +1578,6 @@ http://localhost:2785/api/docs-json
 
 ## 6.9 SDK & Code Examples
 
-### Official SDKs (Coming Soon)
-
-| Language | Package | Status |
-|----------|---------|--------|
-| JavaScript/TypeScript | `@whatsgate/sdk` | 🔜 Planned |
-| Python | `whatsgate-python` | 🔜 Planned |
-| PHP | `whatsgate/php-sdk` | 🔜 Planned |
-| Go | `whatsgate-go` | 🔜 Planned |
 
 ### cURL Examples
 

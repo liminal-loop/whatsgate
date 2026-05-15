@@ -5,6 +5,7 @@ WhatsGate is a NestJS 11 + TypeScript WhatsApp API gateway with modular architec
 ## Runtime and Tooling
 
 - Use Node.js 26 for local and CI parity.
+- Keep the TypeScript toolchain on 5.9.x in this v1 phase unless a dedicated TS 6 migration is explicitly requested.
 - Install dependencies with `npm ci` (preferred) or `npm install`.
 - Main development command: `npm run start:dev`.
 - Build command: `npm run build`.
@@ -28,12 +29,13 @@ WhatsGate is a NestJS 11 + TypeScript WhatsApp API gateway with modular architec
 - Reuse shared services/utilities before adding new abstractions.
 - Keep TypeScript strictness and NestJS patterns consistent with existing code.
 - Prefer minimal, targeted changes over broad refactors unless explicitly requested.
-- For DB schema changes in this v1 phase, keep TypeORM synchronize-based schema management aligned with entities and configuration.
+- For DB schema changes in this v1 phase, keep TypeORM synchronize-based schema management aligned with entities and configuration (no migration scripts unless explicitly requested).
 
 ## Validation Expectations Before Finalizing
 
 - Always run lint and tests for affected code paths when feasible.
-- At minimum, run `npm run lint` and `npm test` after backend code changes.
+- At minimum, run `npm run lint`, `npm test`, and `npm run build` after backend code changes.
+- Run `npm run test:e2e` when e2e files, bootstrap behavior, or dependency/runtime tooling are changed.
 - If API contracts are changed, ensure docs under `docs/` are updated.
 
 ## Security and Secrets

@@ -4,14 +4,16 @@
 
 WhatsGate provides official SDKs for multiple programming languages to simplify API integration. This document describes the SDK design and specifications.
 
+> **v1 Status**: TypeScript/JavaScript and Python SDKs ship as source previews inside the repository (`sdk/javascript/` and `sdk/python/`). They are not yet published to npm or PyPI. PHP and community SDKs are planned for future releases.
+
 ### Supported Languages
 
 ```mermaid
 flowchart TB
     subgraph Tier1["Tier 1 - Official SDKs"]
-        TS[TypeScript/JavaScript]
-        PY[Python]
-        PHP[PHP]
+        TS[TypeScript/JavaScript ✅ Preview]
+        PY[Python ✅ Preview]
+        PHP[PHP 📋 Planned]
     end
 
     subgraph Tier2["Tier 2 - Community SDKs"]

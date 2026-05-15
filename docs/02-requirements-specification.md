@@ -345,7 +345,7 @@ flowchart TB
 
 | ID | Requirement | Description | Priority |
 |----|-------------|-------------|----------|
-| NFR-MT-001 | Code coverage | > 80% unit tests | Medium |
+| NFR-MT-001 | Code coverage | Meet CI global coverage gate (v1 baseline) and increase over time | Medium |
 | NFR-MT-002 | Documentation | API docs up-to-date | High |
 | NFR-MT-003 | Logging | Structured logging | High |
 | NFR-MT-004 | Modular architecture | Loosely coupled | High |
@@ -365,7 +365,7 @@ flowchart TB
 
 | ID | Requirement | Description | Priority |
 |----|-------------|-------------|----------|
-| NFR-CP-001 | Node.js version | 18.x, 20.x LTS | High |
+| NFR-CP-001 | Node.js version | 26.x | High |
 | NFR-CP-002 | Database support | PostgreSQL | High |
 | NFR-CP-003 | OS support | Linux, macOS, Windows | High |
 | NFR-CP-004 | Docker support | Official image | High |

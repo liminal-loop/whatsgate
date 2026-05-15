@@ -220,7 +220,7 @@ quadrantChart
 ```mermaid
 flowchart TB
     subgraph Runtime["Runtime & Framework"]
-        N[Node.js 20 LTS] --> |"TypeScript support, async/await"| NE[NestJS]
+        N[Node.js 26] --> |"TypeScript support, async/await"| NE[NestJS]
         NE --> |"Modular, scalable, DI"| API[REST API]
     end
     
@@ -245,7 +245,7 @@ flowchart TB
 
 | Layer | Technology | Rationale |
 |-------|------------|-----------|
-| Runtime | Node.js 20 LTS | Stable, long-term support |
+| Runtime | Node.js 26 | Current, active release |
 | Language | TypeScript | Type safety, better developer experience |
 | Framework | NestJS | Enterprise-grade, modular |
 | WA Engine | whatsapp-web.js | Mature, active community |

@@ -140,7 +140,7 @@ Ability to run multiple WhatsApp sessions within a single WhatsGate instance.
 Node.js framework for building server-side applications. The WhatsGate backend is built with NestJS.
 
 ### Node.js
-JavaScript runtime used to run WhatsGate. Supported version: Node.js 20 LTS.
+JavaScript runtime used to run WhatsGate. Required version: Node.js 26.
 
 ## O
 

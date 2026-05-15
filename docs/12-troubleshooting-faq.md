@@ -441,6 +441,8 @@ flowchart TD
 
 **Solutions:**
 
+> **Note (v1):** WhatsGate v1 uses TypeORM `synchronize: true` — the schema is updated automatically on startup. Migration scripts are not required in v1. The commands below apply when you have switched off synchronize mode.
+
 ```bash
 # Check migration status
 npm run migration:status
