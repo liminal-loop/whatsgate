@@ -222,7 +222,7 @@ export class InfraController {
       const sanitizeEnvValue = (value: string): string => value.replace(/[\r\n]/g, '').trim();
 
       // Header
-      envLines.push('# OpenWA Configuration');
+      envLines.push('# WhatsGate Configuration');
       envLines.push(`# Generated at ${new Date().toISOString()}`);
       envLines.push('');
 
@@ -231,9 +231,9 @@ export class InfraController {
         envLines.push('# Database');
         envLines.push(`DATABASE_HOST=${sanitizeEnvValue(config.database.host || 'localhost')}`);
         envLines.push(`DATABASE_PORT=${sanitizeEnvValue(config.database.port || '5432')}`);
-        envLines.push(`DATABASE_USERNAME=${sanitizeEnvValue(config.database.username || 'openwa')}`);
+        envLines.push(`DATABASE_USERNAME=${sanitizeEnvValue(config.database.username || 'whatsgate')}`);
         envLines.push(`DATABASE_PASSWORD=${sanitizeEnvValue(config.database.password || '')}`);
-        envLines.push(`DATABASE_NAME=${sanitizeEnvValue(config.database.database || 'openwa')}`);
+        envLines.push(`DATABASE_NAME=${sanitizeEnvValue(config.database.database || 'whatsgate')}`);
         envLines.push(`DATABASE_POOL_SIZE=${config.database.poolSize || 10}`);
         envLines.push(`DATABASE_SSL=${config.database.sslEnabled ? 'true' : 'false'}`);
         envLines.push('');

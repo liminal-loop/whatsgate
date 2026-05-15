@@ -1,6 +1,6 @@
-# OpenWA Copilot Instructions
+# WhatsGate Copilot Instructions
 
-OpenWA is a NestJS 11 + TypeScript WhatsApp API gateway with modular architecture and pluggable adapters.
+WhatsGate is a NestJS 11 + TypeScript WhatsApp API gateway with modular architecture and pluggable adapters.
 
 ## Runtime and Tooling
 

@@ -38,7 +38,7 @@ if (fs.existsSync(generatedEnvPath)) {
 } else {
   console.log('[Bootstrap] First run detected, creating default configuration...');
   // Create minimal .env.generated with sensible defaults
-  const minimalConfig = `# OpenWA Configuration
+  const minimalConfig = `# WhatsGate Configuration
 # Generated automatically on first run
 # Edit this file directly or set environment variables.
 # Note: values in process env or project .env take precedence over this file.
@@ -46,8 +46,8 @@ if (fs.existsSync(generatedEnvPath)) {
 # Database (PostgreSQL)
 DATABASE_HOST=localhost
 DATABASE_PORT=5432
-DATABASE_NAME=openwa
-DATABASE_USERNAME=openwa
+DATABASE_NAME=whatsgate
+DATABASE_USERNAME=whatsgate
 DATABASE_PASSWORD=
 DATABASE_SYNCHRONIZE=false
 
@@ -142,7 +142,7 @@ async function bootstrap() {
 
   // Swagger documentation
   const config = new DocumentBuilder()
-    .setTitle('OpenWA API')
+    .setTitle('WhatsGate API')
     .setDescription('Open Source WhatsApp API Gateway - Free, Self-Hosted HTTP API')
     .setVersion('0.1.0')
     .addApiKey({ type: 'apiKey', name: 'X-API-Key', in: 'header' }, 'X-API-Key')
@@ -162,7 +162,7 @@ async function bootstrap() {
   const port = process.env.PORT || 2785;
   await app.listen(port);
 
-  console.log(`🚀 OpenWA is running on: http://localhost:${port}`);
+  console.log(`🚀 WhatsGate is running on: http://localhost:${port}`);
   console.log(`📚 Swagger docs: http://localhost:${port}/api/docs`);
 }
 

@@ -1,4 +1,4 @@
-# OpenWA Agent Catalog (Optimized)
+# WhatsGate Agent Catalog (Optimized)
 
 This folder contains a compact, non-overlapping agent set aligned to GitHub-centric build and delivery workflows.
 

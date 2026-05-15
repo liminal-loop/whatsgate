@@ -10,7 +10,7 @@ export class AlignPostgresJsonbColumns1770112000000 implements MigrationInterfac
 
     await queryRunner.query(`CREATE EXTENSION IF NOT EXISTS pgcrypto`);
     await queryRunner.query(`
-      CREATE OR REPLACE FUNCTION openwa_try_parse_jsonb(input_text text)
+      CREATE OR REPLACE FUNCTION whatsgate_try_parse_jsonb(input_text text)
       RETURNS jsonb
       LANGUAGE plpgsql
       AS $$
@@ -38,7 +38,7 @@ export class AlignPostgresJsonbColumns1770112000000 implements MigrationInterfac
     await this.setJsonbDefault(queryRunner, 'webhooks', 'headers', "'{}'::jsonb");
     await this.expandApiKeyPrefix(queryRunner);
 
-    await queryRunner.query(`DROP FUNCTION IF EXISTS openwa_try_parse_jsonb(text)`);
+    await queryRunner.query(`DROP FUNCTION IF EXISTS whatsgate_try_parse_jsonb(text)`);
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
@@ -74,7 +74,7 @@ export class AlignPostgresJsonbColumns1770112000000 implements MigrationInterfac
             AND column_name = '${columnName}'
             AND data_type <> 'jsonb'
         ) THEN
-          EXECUTE 'ALTER TABLE "${tableName}" ALTER COLUMN "${columnName}" TYPE jsonb USING CASE WHEN "${columnName}" IS NULL THEN NULL ELSE openwa_try_parse_jsonb("${columnName}"::text) END';
+          EXECUTE 'ALTER TABLE "${tableName}" ALTER COLUMN "${columnName}" TYPE jsonb USING CASE WHEN "${columnName}" IS NULL THEN NULL ELSE whatsgate_try_parse_jsonb("${columnName}"::text) END';
         END IF;
       END $$;
     `);

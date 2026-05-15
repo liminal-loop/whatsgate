@@ -1,10 +1,14 @@
 <p align="center">
-  <img src="docs/logo/openwa_logo.webp" alt="WhatsGate Logo" width="200"/>
+  <img src="docs/logo/whatsgate_brand.svg" alt="WhatsGate Logo" width="360"/>
 </p>
 
 <h1 align="center">WhatsGate</h1>
 <p align="center">
   <strong>WhatsApp Gateway for APIs, Webhooks, and Automation</strong>
+</p>
+
+<p align="center">
+  Build reliable WhatsApp integrations with a modular, event-driven gateway.
 </p>
 
 <p align="center">
@@ -16,7 +20,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-0.1.4-blue.svg" alt="Version"/>
+  <img src="https://img.shields.io/badge/version-0.1.5-blue.svg" alt="Version"/>
   <img src="https://img.shields.io/badge/license-MIT-green.svg" alt="License"/>
   <img src="https://img.shields.io/badge/node-22_LTS-brightgreen.svg" alt="Node"/>
   <img src="https://img.shields.io/badge/NestJS-11.x-red.svg" alt="NestJS"/>
@@ -30,10 +34,10 @@
 
 **WhatsGate** is a free, open-source WhatsApp API Gateway designed for developers who need full control over their messaging infrastructure—without vendor lock-in or hidden paywalls.
 
-Built on a modular architecture, WhatsGate uses **PostgreSQL as the single source of truth** for persisted data, with pluggable storage backends (Local/S3) and cache layers (Memory/Redis).
+Built on a modular architecture, WhatsGate uses **PostgreSQL as the single source of truth** for persisted data, with event-driven processing, pluggable media storage backends (Local/S3), and optional Redis-backed queue/cache acceleration.
 
 | 🔓 **100% Open Source**       | No licensing fees, no feature locks, full source code access |
-| 🏗️ **Pluggable Architecture** | Swap adapters for database, storage, and cache via config    |
+| 🏗️ **Modular Architecture**   | Extend features with modules, hooks, and plugin integrations |
 | 🔹 **Multi-Session Ready**    | Run multiple WhatsApp sessions concurrently on one instance  |
 | 🔗 **n8n Integration**        | Community nodes for workflow automation                      |
 
@@ -77,11 +81,11 @@ Built on a modular architecture, WhatsGate uses **PostgreSQL as the single sourc
 
 | Feature          | Status | Description                    |
 | ---------------- | ------ | ------------------------------ |
-| PostgreSQL       | ✅     | Single source-of-truth database |
+| PostgreSQL       | ✅     | Single source-of-truth database  |
 | Redis Cache      | ✅     | Optional performance caching   |
 | S3 Storage       | ✅     | Scalable media storage         |
 | Health Checks    | ✅     | Kubernetes-ready probes        |
-| Data Migration   | ✅     | Export/import between backends |
+| Data Migration   | ✅     | Export/import utilities for operations |
 
 ---
 
@@ -93,7 +97,7 @@ git clone https://github.com/rmyndharis/whatsgate.git
 cd whatsgate
 
 # Install dependencies
-npm install
+npm ci
 
 # Copy and configure environment
 cp .env.example .env
@@ -116,7 +120,7 @@ WhatsGate is a standard Node.js application — deploy it anywhere Node.js runs.
 ```bash
 git clone https://github.com/rmyndharis/whatsgate.git
 cd whatsgate
-npm install
+npm ci
 
 # Configure environment
 cp .env.example .env
@@ -201,7 +205,7 @@ curl -X POST http://localhost:2785/api/sessions/{sessionId}/webhooks \
 | **Framework** | NestJS 11.x             |
 | **Language**  | TypeScript 5.x          |
 | **WA Engine** | whatsapp-web.js         |
-| **Database**  | PostgreSQL              |
+| **Database**  | PostgreSQL (single source of truth) |
 | **Cache**     | Redis (optional)        |
 | **Storage**   | Local / S3              |
 | **ORM**       | TypeORM                 |
@@ -233,8 +237,8 @@ whatsgate/
 │       ├── infra/              # Infrastructure management
 │       └── health/             # Health checks
 ├── docs/                      # Documentation
-├── docker-compose.yml
-├── Dockerfile
+├── scripts/                   # Shell/bootstrap scripts
+├── test/                      # E2E tests and test config
 └── package.json
 ```
 

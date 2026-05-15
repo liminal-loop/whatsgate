@@ -1,0 +1,30 @@
+<svg width="960" height="300" viewBox="0 0 960 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="wg_bg" x1="0" y1="0" x2="960" y2="300" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0A1F1B"/>
+      <stop offset="1" stop-color="#13332D"/>
+    </linearGradient>
+    <linearGradient id="wg_primary" x1="110" y1="40" x2="250" y2="180" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#25D366"/>
+      <stop offset="1" stop-color="#12A150"/>
+    </linearGradient>
+    <linearGradient id="wg_accent" x1="140" y1="84" x2="260" y2="216" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#5BE79A"/>
+      <stop offset="1" stop-color="#1FC96B"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="960" height="300" rx="24" fill="url(#wg_bg)"/>
+
+  <g>
+    <circle cx="170" cy="150" r="92" fill="url(#wg_primary)"/>
+    <path d="M225 150C225 181.48 199.48 207 168 207C156.53 207 145.85 203.58 136.93 197.72L108 205L115.28 176.07C109.42 167.15 106 156.47 106 145C106 113.52 131.52 88 163 88C194.48 88 220 113.52 220 145C220 146.68 219.93 148.35 219.8 150H225Z" fill="url(#wg_accent)"/>
+    <path d="M150.36 119.69C148.65 115.89 146.87 115.8 145.26 115.73C143.93 115.67 142.42 115.67 140.91 115.67C139.4 115.67 136.95 116.23 134.86 118.51C132.77 120.79 126.86 126.32 126.86 137.56C126.86 148.8 135.05 159.66 136.2 161.18C137.34 162.7 152.16 186.72 175.53 196.84C194.98 205.26 198.95 203.58 203.1 203.2C207.25 202.82 216.49 197.67 218.39 192.34C220.29 187.01 220.29 182.44 219.72 181.49C219.15 180.54 217.63 179.97 215.35 178.83C213.07 177.69 201.86 172.17 199.77 171.41C197.68 170.65 196.16 170.27 194.65 172.55C193.13 174.83 188.75 179.97 187.42 181.49C186.09 183.01 184.76 183.2 182.48 182.06C180.2 180.92 172.83 178.5 164.09 170.71C157.28 164.64 152.68 157.14 151.35 154.86C150.02 152.58 151.21 151.35 152.35 150.21C153.38 149.19 154.62 147.55 155.76 146.22C156.9 144.89 157.28 143.94 158.04 142.42C158.8 140.9 158.42 139.57 157.85 138.43C157.28 137.29 152.73 126.07 150.36 119.69Z" fill="#F4FFF8"/>
+    <path d="M205 99L246 140" stroke="#D3FFE5" stroke-width="16" stroke-linecap="round"/>
+  </g>
+
+  <g fill="#F4FFF8">
+    <text x="300" y="140" font-family="Segoe UI, Arial, sans-serif" font-size="78" font-weight="700" letter-spacing="0.5">WhatsGate</text>
+    <text x="300" y="190" font-family="Segoe UI, Arial, sans-serif" font-size="30" font-weight="400" fill="#BDEFD2">WhatsApp Gateway for APIs, Webhooks, and Automation</text>
+  </g>
+</svg>
