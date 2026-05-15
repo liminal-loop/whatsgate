@@ -2,7 +2,7 @@
 
 ## 2.1 Overview
 
-This document defines the functional and non-functional requirements for OpenWA.
+This document defines the functional and non-functional requirements for WhatsGate.
 
 ## 2.2 Functional Requirements
 
@@ -82,7 +82,7 @@ flowchart TB
 ```mermaid
 sequenceDiagram
     participant WA as WhatsApp
-    participant OW as OpenWA
+    participant OW as WhatsGate
     participant WH as Webhook URL
     
     WA->>OW: New Message Event
@@ -345,7 +345,7 @@ flowchart TB
 
 | ID | Requirement | Description | Priority |
 |----|-------------|-------------|----------|
-| NFR-MT-001 | Code coverage | > 80% unit tests | Medium |
+| NFR-MT-001 | Code coverage | Meet CI global coverage gate (v1 baseline) and increase over time | Medium |
 | NFR-MT-002 | Documentation | API docs up-to-date | High |
 | NFR-MT-003 | Logging | Structured logging | High |
 | NFR-MT-004 | Modular architecture | Loosely coupled | High |
@@ -365,7 +365,7 @@ flowchart TB
 
 | ID | Requirement | Description | Priority |
 |----|-------------|-------------|----------|
-| NFR-CP-001 | Node.js version | 18.x, 20.x LTS | High |
+| NFR-CP-001 | Node.js version | 26.x | High |
 | NFR-CP-002 | Database support | PostgreSQL | High |
 | NFR-CP-003 | OS support | Linux, macOS, Windows | High |
 | NFR-CP-004 | Docker support | Official image | High |
@@ -378,7 +378,7 @@ flowchart TB
 ```mermaid
 sequenceDiagram
     actor User
-    participant API as OpenWA API
+    participant API as WhatsGate API
     participant Engine as WA Engine
     participant WA as WhatsApp
     
@@ -410,7 +410,7 @@ sequenceDiagram
 sequenceDiagram
     participant WA as WhatsApp
     participant Engine as WA Engine
-    participant API as OpenWA
+    participant API as WhatsGate
     participant WH as User Webhook
     
     WA->>Engine: New message received

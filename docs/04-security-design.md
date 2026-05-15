@@ -79,154 +79,45 @@ Storage: SHA-256 hash only (never store plain key)
 | `groups:read` | View groups |
 | `groups:write` | Manage groups |
 
-## 4.3 IP Whitelisting
+## 4.3 IP Allowlisting
 
-IP whitelisting adds an extra security layer by restricting API key access to specific IP addresses.
+IP allowlisting adds an extra security layer by restricting API key access to specific IP addresses or CIDR ranges.
 
-### IP Whitelist Flow
+### IP Allowlist Flow (Fail-Closed)
 
 ```mermaid
 flowchart TB
     REQ[Incoming Request] --> AUTH[API Key Valid?]
     AUTH -->|No| R401[401 Unauthorized]
-    AUTH -->|Yes| WL{IP Whitelist Enabled?}
+    AUTH -->|Yes| WL{IP Allowlist Defined?}
     WL -->|No| ALLOW[Allow Request]
-    WL -->|Yes| CHECK{IP in Whitelist?}
+    WL -->|Yes| IPCHECK{Client IP resolvable?}
+    IPCHECK -->|No| R403A[403 Forbidden — IP unknown]
+    IPCHECK -->|Yes| CHECK{IP matches allowlist?}
     CHECK -->|No| R403[403 Forbidden]
     CHECK -->|Yes| ALLOW
-    ALLOW --> PROCESS[Process Request]
+    ALLOW --> SESS{Session Scope Defined?}
+    SESS -->|No| PROCESS[Process Request]
+    SESS -->|Yes| SIDCHECK{sessionId on route?}
+    SIDCHECK -->|No| R403B[403 Forbidden — scope mismatch]
+    SIDCHECK -->|Yes| PROCESS
 ```
+
+> **Fail-closed**: if an API key has an IP allowlist and the client IP cannot be determined, the request is denied (403). Similarly, if an API key is restricted to specific sessions and the route does not carry a resolvable `sessionId`, access is denied.
+
+### Implementation Details
+
+- Client IP is read from `request.ip` / `socket.remoteAddress` only. `X-Forwarded-For` headers are **never** trusted directly; the Express `trust proxy` setting is controlled via the `TRUST_PROXY` environment variable.
+- IPv4-mapped IPv6 addresses (`::ffff:x.x.x.x`) are normalised to plain IPv4. Loopback `::1` is mapped to `127.0.0.1`.
+- CIDR parsing is strict — malformed ranges (invalid prefix length, wrong address format) silently fail to match, so the request is denied when an allowlist is present.
 
 ### Configuration
 
 ```typescript
-// API to manage IP whitelist
-interface IpWhitelistEntry {
-  id: string;
-  apiKeyId: string;
-  ipAddress: string;      // Single IP: "203.0.113.50"
-  cidrRange?: string;     // CIDR: "10.0.0.0/24"
-  description?: string;
-  active: boolean;
-  createdAt: Date;
-}
-```
-
-### API Endpoints
-
-#### Add IP to Whitelist
-
-```http
-POST /api/auth/api-keys/:apiKeyId/whitelist
-```
-
-**Request Body:**
-```json
-{
-  "ipAddress": "203.0.113.50",
-  "description": "Production server"
-}
-```
-
-**For CIDR Range:**
-```json
-{
-  "ipAddress": "10.0.0.0",
-  "cidrRange": "10.0.0.0/24",
-  "description": "Internal network"
-}
-```
-
-#### List Whitelisted IPs
-
-```http
-GET /api/auth/api-keys/:apiKeyId/whitelist
-```
-
-#### Remove IP from Whitelist
-
-```http
-DELETE /api/auth/api-keys/:apiKeyId/whitelist/:entryId
-```
-
-### Implementation
-
-```typescript
-// IP Whitelist Guard
-@Injectable()
-export class IpWhitelistGuard implements CanActivate {
-  constructor(
-    private readonly ipWhitelistService: IpWhitelistService,
-  ) {}
-
-  async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest();
-    const apiKeyId = request.apiKey?.id;
-
-    if (!apiKeyId) {
-      return true; // Let other guards handle missing API key
-    }
-
-    const clientIp = this.getClientIp(request);
-    const whitelist = await this.ipWhitelistService.getByApiKey(apiKeyId);
-
-    // If no whitelist entries, allow all IPs
-    if (whitelist.length === 0) {
-      return true;
-    }
-
-    // Check if IP matches any whitelist entry
-    const isAllowed = whitelist.some(entry =>
-      this.ipMatches(clientIp, entry)
-    );
-
-    if (!isAllowed) {
-      throw new ForbiddenException({
-        code: 'IP_NOT_WHITELISTED',
-        message: `IP address ${clientIp} is not in the whitelist`,
-      });
-    }
-
-    return true;
-  }
-
-  private getClientIp(request: Request): string {
-    // Handle proxies (X-Forwarded-For, X-Real-IP)
-    const forwarded = request.headers['x-forwarded-for'];
-    if (forwarded) {
-      return (forwarded as string).split(',')[0].trim();
-    }
-    return request.headers['x-real-ip'] as string ||
-           request.socket.remoteAddress ||
-           '';
-  }
-
-  private ipMatches(clientIp: string, entry: IpWhitelistEntry): boolean {
-    if (!entry.active) return false;
-
-    if (entry.cidrRange) {
-      return this.ipInCidr(clientIp, entry.cidrRange);
-    }
-
-    return clientIp === entry.ipAddress;
-  }
-
-  private ipInCidr(ip: string, cidr: string): boolean {
-    // IPv4-only example. For IPv6 support, use a library like ipaddr.js.
-    const [range, bits] = cidr.split('/');
-    const mask = ~(2 ** (32 - parseInt(bits)) - 1);
-
-    const ipNum = this.ipToNumber(ip);
-    const rangeNum = this.ipToNumber(range);
-
-    return (ipNum & mask) === (rangeNum & mask);
-  }
-
-  private ipToNumber(ip: string): number {
-    return ip.split('.').reduce(
-      (acc, octet) => (acc << 8) + parseInt(octet), 0
-    ) >>> 0;
-  }
+// Stored on the ApiKey entity
+interface ApiKeyAllowlist {
+  allowedIps: string[];      // e.g. ["203.0.113.50", "10.0.0.0/24"]
+  allowedSessions: string[]; // session IDs this key may access (empty = all)
 }
 ```
 
@@ -235,14 +126,10 @@ export class IpWhitelistGuard implements CanActivate {
 | Practice | Description |
 |----------|-------------|
 | **Use CIDR notation** | For IP ranges, use CIDR instead of multiple entries |
-| **Trusted Proxies** | Configure trusted proxies for accurate client IP |
-| **Regular Review** | Review whitelist entries regularly |
-| **Audit Logging** | Log all blocked attempts for monitoring |
-| **Fallback Plan** | Prepare a process to update the whitelist when IPs change |
-
-### IPv6 Support
-
-For IPv6, use a library that supports IPv6 parsing (e.g., `ipaddr.js`) when performing `ipInCidr`.
+| **TRUST_PROXY** | Set `TRUST_PROXY=1` (or the hop count) when behind a reverse proxy so `request.ip` reflects the real client |
+| **Regular Review** | Review allowlist entries periodically |
+| **Audit Logging** | All blocked attempts are recorded in the audit log |
+| **Session Scope** | Restrict per-session API keys with `allowedSessions` to limit blast radius |
 
 ## 4.4 Data Encryption
 
@@ -404,12 +291,12 @@ const corsOptions = {
 
 ```mermaid
 sequenceDiagram
-    participant OW as OpenWA
+    participant OW as WhatsGate
     participant WH as Webhook Endpoint
     
     OW->>OW: Create payload
     OW->>OW: Sign with HMAC-SHA256
-    OW->>WH: POST + X-OpenWA-Signature
+    OW->>WH: POST + X-WhatsGate-Signature
     WH->>WH: Verify signature
     WH->>WH: Process if valid
     WH-->>OW: 200 OK
@@ -418,7 +305,7 @@ sequenceDiagram
 ### Signature Verification
 
 ```typescript
-// OpenWA: Generate signature
+// WhatsGate: Generate signature
 function signPayload(payload: object, secret: string): string {
   const hmac = crypto.createHmac('sha256', secret);
   hmac.update(JSON.stringify(payload));
@@ -587,7 +474,7 @@ version: '3.8'
 
 services:
   app:
-    image: openwa:latest
+    image: whatsgate:latest
     secrets:
       - db_password
       - encryption_key
@@ -842,7 +729,7 @@ contacts:
     
   security_lead:
     name: "Security Lead"
-    email: "security@openwa.dev"
+    email: "security@whatsgate.dev"
     
   escalation:
     - level: 1
@@ -854,7 +741,7 @@ contacts:
 
 communication:
   internal_channel: "#incident-response"
-  status_page: "https://status.openwa.dev"
+  status_page: "https://status.whatsgate.dev"
 ```
 
 ### Runbooks

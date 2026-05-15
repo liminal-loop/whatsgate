@@ -70,6 +70,12 @@ If all fields are sufficiently clear, do not ask further questions.
 - Always run relevant lint/tests before completion.
 - Maintain a concise running status with: phase, outcome, blockers, next action.
 
+## Repository Defaults (v1)
+
+- Assume target branch is `main` unless explicitly specified otherwise.
+- Assume Node.js 26 toolchain and TypeScript 5.9.x unless the requirement is a version-migration task.
+- For DB changes in v1, prefer entity/config synchronization alignment over migration script workflows unless explicitly requested.
+
 ## Final Output Contract
 
 Return:

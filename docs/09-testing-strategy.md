@@ -2,22 +2,29 @@
 
 ## Implementation Status
 
-> **Current Status: Minimal Implementation**
+> **Current Status: v1 Baseline Coverage**
 >
-> This document outlines the planned testing strategy for OpenWA. The current implementation includes only foundational tests:
+> The v1 release ships a meaningful unit and e2e test baseline that gates CI. Coverage will expand in future releases.
 >
-> | Test Type | Planned | Actual |
-> |-----------|---------|--------|
-> | Unit Tests | 60% coverage | 3 files |
-> | Integration Tests | 30% coverage | Not yet |
-> | E2E Tests | Critical paths | Not yet |
+> | Test Type | Target | v1 Status |
+> |-----------|--------|-----------|
+> | Unit Tests | > 80% coverage | Active — key modules covered |
+> | Integration Tests | > 60% coverage | Planned |
+> | E2E Tests | Critical paths | Health endpoints covered via `test/app.e2e-spec.ts`; optional Docker suite via `test/app.testcontainers.e2e-spec.ts` |
 >
-> **Existing test files:**
-> - `src/common/services/logger.service.spec.ts` - Logger functionality
-> - `src/modules/health/health.controller.spec.ts` - Health endpoints
-> - `src/modules/webhook/utils/idempotency.util.spec.ts` - Idempotency utilities
+> **v1 test files:**
+> - `src/common/services/logger.service.spec.ts` — Logger functionality
+> - `src/modules/health/health.controller.spec.ts` — Health endpoints
+> - `src/modules/webhook/utils/idempotency.util.spec.ts` — Idempotency utilities
+> - `src/modules/auth/auth.service.spec.ts` — API key validation, session-scope and IP fail-closed semantics (42+ cases)
+> - `src/modules/auth/guards/api-key.guard.spec.ts` — IP normalization, XFF rejection
+> - `src/modules/session/session.service.spec.ts` — Hook callback dispatch (continue flag)
+> - `src/modules/webhook/webhook.service.spec.ts` — Queue-mode dispatch, error hooks
+> - `src/modules/queue/processors/webhook.processor.spec.ts` — Delivery, partial failure, final failure
+> - `test/app.e2e-spec.ts` — Health module e2e (`/api/health`, `/api/health/live`, `/api/health/ready`)
+> - `test/app.testcontainers.e2e-spec.ts` — Optional Docker-backed e2e suite (gated by `RUN_TESTCONTAINERS_E2E=true`)
 >
-> Comprehensive testing is planned for future releases. The strategy below serves as a guide for contributors and future development phases.
+> All unit tests run in CI (`npm test`). E2E tests (`npm run test:e2e`) run in CI for bootstrap and health behaviour changes.
 
 ---
 
@@ -45,9 +52,9 @@ flowchart TB
 
 | Goal | Target | Current | Priority |
 |------|--------|---------|----------|
-| Code Coverage | > 80% | ~5% | High |
-| Integration Test Coverage | > 70% | 0% | High |
-| E2E Critical Paths | 100% | 0% | High |
+| Code Coverage | > 80% | Auth + session + webhook modules covered | High |
+| Integration Test Coverage | > 60% | Planned | High |
+| E2E Critical Paths | 100% | Health module paths covered | High |
 | Performance Benchmarks | Pass all | Not started | Medium |
 | Security Scan | 0 Critical | ✅ Passing | High |
 
@@ -58,8 +65,8 @@ flowchart TB
 ```json
 {
   "devDependencies": {
-    "jest": "^29.0.0",
-    "@nestjs/testing": "^10.0.0",
+    "jest": "^30.0.0",
+    "@nestjs/testing": "^11.0.0",
     "ts-jest": "^29.0.0"
   }
 }
@@ -187,7 +194,7 @@ services:
   postgres-test:
     image: postgres:15
     environment:
-      POSTGRES_DB: openwa_test
+      POSTGRES_DB: whatsgate_test
       POSTGRES_USER: test
       POSTGRES_PASSWORD: test
     ports:
@@ -616,7 +623,7 @@ jobs:
       postgres:
         image: postgres:15
         env:
-          POSTGRES_DB: openwa_test
+          POSTGRES_DB: whatsgate_test
           POSTGRES_USER: test
           POSTGRES_PASSWORD: test
         ports:
@@ -635,7 +642,7 @@ jobs:
       - run: npm ci
       - run: npm run test:integration
         env:
-          DATABASE_URL: postgresql://test:test@localhost:5432/openwa_test
+          DATABASE_URL: postgresql://test:test@localhost:5432/whatsgate_test
           REDIS_URL: redis://localhost:6379
 
   e2e-tests:

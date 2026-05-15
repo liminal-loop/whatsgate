@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import helmet from 'helmet';
+import type { Express } from 'express';
 import { AppModule } from './app.module';
 import { ShutdownService } from './common/services/shutdown.service';
 import * as dotenv from 'dotenv';
@@ -38,7 +39,7 @@ if (fs.existsSync(generatedEnvPath)) {
 } else {
   console.log('[Bootstrap] First run detected, creating default configuration...');
   // Create minimal .env.generated with sensible defaults
-  const minimalConfig = `# OpenWA Configuration
+  const minimalConfig = `# WhatsGate Configuration
 # Generated automatically on first run
 # Edit this file directly or set environment variables.
 # Note: values in process env or project .env take precedence over this file.
@@ -46,8 +47,8 @@ if (fs.existsSync(generatedEnvPath)) {
 # Database (PostgreSQL)
 DATABASE_HOST=localhost
 DATABASE_PORT=5432
-DATABASE_NAME=openwa
-DATABASE_USERNAME=openwa
+DATABASE_NAME=whatsgate
+DATABASE_USERNAME=whatsgate
 DATABASE_PASSWORD=
 DATABASE_SYNCHRONIZE=false
 
@@ -66,6 +67,26 @@ STORAGE_PATH=./data/media
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  // Configure Express trust proxy only when explicitly requested.
+  // This avoids accidental trust of client-supplied forwarding headers.
+  const trustProxyRaw = process.env.TRUST_PROXY?.trim();
+  if (trustProxyRaw) {
+    let trustProxyValue: boolean | number | string;
+    const normalized = trustProxyRaw.toLowerCase();
+    if (normalized === 'true') {
+      trustProxyValue = true;
+    } else if (normalized === 'false') {
+      trustProxyValue = false;
+    } else if (/^\d+$/.test(trustProxyRaw)) {
+      trustProxyValue = parseInt(trustProxyRaw, 10);
+    } else {
+      trustProxyValue = trustProxyRaw;
+    }
+
+    const expressApp = app.getHttpAdapter().getInstance() as Express;
+    expressApp.set('trust proxy', trustProxyValue);
+  }
 
   // Enable shutdown hooks for graceful shutdown
   app.enableShutdownHooks();
@@ -142,7 +163,7 @@ async function bootstrap() {
 
   // Swagger documentation
   const config = new DocumentBuilder()
-    .setTitle('OpenWA API')
+    .setTitle('WhatsGate API')
     .setDescription('Open Source WhatsApp API Gateway - Free, Self-Hosted HTTP API')
     .setVersion('0.1.0')
     .addApiKey({ type: 'apiKey', name: 'X-API-Key', in: 'header' }, 'X-API-Key')
@@ -162,7 +183,7 @@ async function bootstrap() {
   const port = process.env.PORT || 2785;
   await app.listen(port);
 
-  console.log(`🚀 OpenWA is running on: http://localhost:${port}`);
+  console.log(`🚀 WhatsGate is running on: http://localhost:${port}`);
   console.log(`📚 Swagger docs: http://localhost:${port}/api/docs`);
 }
 

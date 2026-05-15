@@ -21,7 +21,7 @@ docker compose ps
 docker compose logs --tail=50
 
 # System resources
-docker stats openwa
+docker stats whatsgate
 ```
 
 ### Diagnostic Flowchart
@@ -70,7 +70,7 @@ netstat -tlnp | grep 3000
 kill -9 $(lsof -t -i:2785)
 
 # Check Docker logs
-docker compose logs openwa
+docker compose logs whatsgate
 
 # Common fixes
 docker compose down --volumes  # Reset volumes
@@ -94,7 +94,7 @@ curl -H "X-API-Key: $API_KEY" \
   http://localhost:2785/api/sessions/{sessionId}
 
 # Check WhatsApp engine logs
-docker compose logs openwa 2>&1 | grep -i "whatsapp\|puppeteer\|browser"
+docker compose logs whatsgate 2>&1 | grep -i "whatsapp\|puppeteer\|browser"
 
 # Check auth folder
 ls -la ./data/.wwebjs_auth/session-{sessionId}/
@@ -113,7 +113,7 @@ ls -la ./data/.wwebjs_auth/session-{sessionId}/
 ```bash
 # Clear auth and restart
 rm -rf ./data/.wwebjs_auth/session-{sessionId}
-docker compose restart openwa
+docker compose restart whatsgate
 
 # If using proxy
 export PROXY_URL=http://proxy:8080
@@ -301,7 +301,7 @@ webhook:
 
 ```bash
 # Check memory usage
-docker stats openwa --no-stream
+docker stats whatsgate --no-stream
 
 # Check per-session memory
 curl -H "X-API-Key: $API_KEY" \
@@ -315,7 +315,7 @@ curl -H "X-API-Key: $API_KEY" \
 ```yaml
 # docker-compose.yml - Set memory limits
 services:
-  openwa:
+  whatsgate:
     deploy:
       resources:
         limits:
@@ -404,17 +404,17 @@ cache:
 
 ```bash
 # Check for long-running queries
-sqlite3 ./data/openwa.db ".timeout 30000"
+sqlite3 ./data/whatsgate.db ".timeout 30000"
 
 # Increase timeout in configuration
 DATABASE_SQLITE_BUSY_TIMEOUT=30000
 
 # Check WAL mode
-sqlite3 ./data/openwa.db "PRAGMA journal_mode;"
+sqlite3 ./data/whatsgate.db "PRAGMA journal_mode;"
 # Should return: wal
 
 # Enable WAL mode
-sqlite3 ./data/openwa.db "PRAGMA journal_mode=WAL;"
+sqlite3 ./data/whatsgate.db "PRAGMA journal_mode=WAL;"
 ```
 
 **When to Migrate to PostgreSQL:**
@@ -440,6 +440,8 @@ flowchart TD
 - Missing tables
 
 **Solutions:**
+
+> **Note (v1):** WhatsGate v1 uses TypeORM `synchronize: true` — the schema is updated automatically on startup. Migration scripts are not required in v1. The commands below apply when you have switched off synchronize mode.
 
 ```bash
 # Check migration status
@@ -479,7 +481,7 @@ sudo chown -R $(id -u):$(id -g) ./data/
 # Or use Docker's user mapping
 # docker-compose.yml
 services:
-  openwa:
+  whatsgate:
     user: "1000:1000"  # Your UID:GID
 ```
 
@@ -495,33 +497,33 @@ services:
 ```yaml
 # docker-compose.yml - Ensure proper networking
 services:
-  openwa:
+  whatsgate:
     networks:
-      - openwa-network
+      - whatsgate-network
     extra_hosts:
       - "host.docker.internal:host-gateway"  # Access host from container
 
   postgres:
     networks:
-      - openwa-network
+      - whatsgate-network
 
 networks:
-  openwa-network:
+  whatsgate-network:
     driver: bridge
 ```
 
 ```bash
 # Test connectivity from container
-docker exec openwa ping postgres
-docker exec openwa curl http://host.docker.internal:8080
+docker exec whatsgate ping postgres
+docker exec whatsgate curl http://host.docker.internal:8080
 ```
 
 ## 12.7 Frequently Asked Questions
 
 ### General Questions
 
-**Q: Is OpenWA safe to use?**
-> A: OpenWA uses unofficial WhatsApp Web API. While we implement best practices to avoid detection, there's inherent risk of account restrictions. We recommend:
+**Q: Is WhatsGate safe to use?**
+> A: WhatsGate uses unofficial WhatsApp Web API. While we implement best practices to avoid detection, there's inherent risk of account restrictions. We recommend:
 > - Use dedicated phone number (not personal)
 > - Don't send spam or bulk unsolicited messages
 > - Follow WhatsApp's Terms of Service
@@ -535,7 +537,7 @@ docker exec openwa curl http://host.docker.internal:8080
 > Each session uses ~300-500MB RAM.
 
 **Q: Can I use WhatsApp Business account?**
-> A: Yes, OpenWA works with both personal and WhatsApp Business accounts. Note that WhatsApp Business API (official Meta API) is different and not supported.
+> A: Yes, WhatsGate works with both personal and WhatsApp Business accounts. Note that WhatsApp Business API (official Meta API) is different and not supported.
 
 **Q: How to avoid getting banned?**
 > Best practices:
@@ -581,7 +583,7 @@ curl -X POST http://localhost:2785/api/sessions/{id}/messages \
 **Q: How to use with n8n?**
 > See [n8n Integration Guide](./examples/n8n-integration.md). Quick setup:
 > 1. Add HTTP Request node
-> 2. Set URL: `http://openwa:2785/api/sessions/{id}/messages`
+> 2. Set URL: `http://whatsgate:2785/api/sessions/{id}/messages`
 > 3. Add header: `X-API-Key: your-key`
 > 4. Configure webhook trigger for incoming messages
 
@@ -616,7 +618,7 @@ server {
 #!/bin/bash
 # backup-cron.sh - Add to crontab: 0 */6 * * * /path/to/backup-cron.sh
 
-BACKUP_DIR="/backups/openwa"
+BACKUP_DIR="/backups/whatsgate"
 DATE=$(date +%Y%m%d-%H%M%S)
 
 # Create backup directory
@@ -626,7 +628,7 @@ mkdir -p "$BACKUP_DIR/$DATE"
 if [ "$DATABASE_ADAPTER" = "postgresql" ]; then
     pg_dump $DATABASE_URL > "$BACKUP_DIR/$DATE/database.sql"
 else
-    cp ./data/openwa.db "$BACKUP_DIR/$DATE/"
+    cp ./data/whatsgate.db "$BACKUP_DIR/$DATE/"
 fi
 
 # Backup auth sessions
@@ -720,7 +722,7 @@ available_events:
 ### Before Asking for Help
 
 1. **Check this FAQ** - Most common issues are covered
-2. **Check logs** - `docker compose logs openwa --tail=100`
+2. **Check logs** - `docker compose logs whatsgate --tail=100`
 3. **Try basic troubleshooting** - Restart, clear cache, etc.
 4. **Search GitHub issues** - Your issue might be already reported
 
@@ -730,7 +732,7 @@ When creating GitHub issue, include:
 
 ```markdown
 ## Environment
-- OpenWA version: x.x.x
+- WhatsGate version: x.x.x
 - Docker version: x.x.x
 - OS: Ubuntu 22.04 / macOS / Windows
 - Database: SQLite / PostgreSQL
@@ -763,10 +765,10 @@ When creating GitHub issue, include:
 
 ### Community Resources
 
-- **GitHub Issues**: [github.com/rmyndharis/OpenWA/issues](https://github.com/rmyndharis/OpenWA/issues)
-- **Discussions**: [github.com/rmyndharis/OpenWA/discussions](https://github.com/rmyndharis/OpenWA/discussions)
-- **Discord**: [discord.gg/openwa](https://discord.gg/openwa) (if available)
-- **Stack Overflow**: Tag with `openwa`
+- **GitHub Issues**: [github.com/rmyndharis/WhatsGate/issues](https://github.com/rmyndharis/WhatsGate/issues)
+- **Discussions**: [github.com/rmyndharis/WhatsGate/discussions](https://github.com/rmyndharis/WhatsGate/discussions)
+- **Discord**: [discord.gg/whatsgate](https://discord.gg/whatsgate) (if available)
+- **Stack Overflow**: Tag with `whatsgate`
 ---
 
 <div align="center">

@@ -1,11 +1,11 @@
-# OpenWA Agent Catalog (Optimized)
+# WhatsGate Agent Catalog (Optimized)
 
 This folder contains a compact, non-overlapping agent set aligned to GitHub-centric build and delivery workflows.
 
 ## Optimized Agent Set
 
 1. `Autopilot Team Lead`
-1. `Product & Implementation Planner`
+2. `Product & Implementation Planner`
 2. `Build Engineer (App + GitHub)`
 3. `Quality Gate Reviewer`
 4. `Application Security Reviewer`
@@ -31,6 +31,13 @@ This folder contains a compact, non-overlapping agent set aligned to GitHub-cent
 1. Start with `Autopilot Team Lead` and provide the requirement.
 2. Team lead runs planning, build, quality, security, OSS compliance, CI/CD, architecture, and docs phases as needed.
 3. Team lead asks clarifications only when details are blocker-level ambiguous.
+
+## V1 Baseline Constraints
+
+- Runtime baseline: Node.js 26.
+- TypeScript baseline: 5.9.x in this phase; treat TS 6.x upgrades as explicit migration work.
+- Database schema management for v1: TypeORM synchronize-based alignment with entities (no migration scripts by default).
+- Default quality gate for backend work: lint + unit tests + build; include e2e when bootstrap/runtime/dependency behavior changes.
 
 ## Autopilot Kickoff Prompt
 

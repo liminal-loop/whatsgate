@@ -64,11 +64,25 @@ export class ApiKeyGuard implements CanActivate {
   }
 
   private getClientIp(request: Request): string {
-    const forwarded = request.headers['x-forwarded-for'];
-    if (forwarded) {
-      const ips = (forwarded as string).split(',');
-      return ips[0].trim();
+    const resolvedIp = request.ip || request.socket.remoteAddress || '';
+    return this.normalizeIp(resolvedIp);
+  }
+
+  private normalizeIp(ip: string): string {
+    const value = ip.trim();
+
+    if (!value) {
+      return '';
     }
-    return request.ip || request.socket.remoteAddress || '';
+
+    if (value.startsWith('::ffff:')) {
+      return value.substring(7);
+    }
+
+    if (value === '::1') {
+      return '127.0.0.1';
+    }
+
+    return value;
   }
 }

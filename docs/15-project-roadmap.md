@@ -4,7 +4,7 @@
 
 ```mermaid
 timeline
-    title OpenWA Release Timeline
+    title WhatsGate Release Timeline
 
     section v0.0.1 - MVP
         Month 1-3 : Foundation & Engine
@@ -44,8 +44,8 @@ timeline
 | ------- | --------------------------- | ----------- |
 | v0.0.1  | MVP - Basic API             | ✅ Released |
 | v0.0.2  | Production Ready            | ✅ Released |
-| v0.1.0  | Initial Stable Release      | ✅ Released |
-| v0.2.0  | SDK & Developer Tools       | 📋 Planned  |
+| v0.1.5  | Security Hardening & Deps  | ✅ Released |
+| v0.2.0  | SDK & Developer Tools       | 🔄 Preview  |
 | v0.3.0  | Performance & Observability | 📋 Planned  |
 | v1.0.0  | Enterprise Ready            | 📋 Planned  |
 
@@ -63,7 +63,7 @@ Each phase includes a 2–3 week buffer for:
 | Requirement        | Details                                                   |
 | ------------------ | --------------------------------------------------------- |
 | **Development**    | 1-2 full-time developers (or equivalent part-time)        |
-| **Environment**    | Node.js 20 LTS, Docker, Git                               |
+| **Environment**    | Node.js 26, Docker, Git                                   |
 | **Testing**        | WhatsApp test accounts (2-3 numbers)                      |
 | **Infrastructure** | VPS for staging (2GB RAM minimum)                         |
 | **Accounts**       | GitHub organization, npm registry access, Docker Hub/GHCR |
@@ -219,7 +219,7 @@ flowchart TB
 
 ```
 v0.0.1 Release Package:
-├── Docker image (ghcr.io/rmyndharis/openwa:0.0.1)
+├── Docker image (ghcr.io/rmyndharis/whatsgate:0.0.1)
 ├── docker-compose.yml
 ├── Basic API documentation (Swagger)
 ├── README with quick start
@@ -329,7 +329,7 @@ gantt
 
 ```
 v0.0.2 Release Package:
-├── Docker image (ghcr.io/rmyndharis/openwa:0.0.2)
+├── Docker image (ghcr.io/rmyndharis/whatsgate:0.0.2)
 ├── docker-compose.yml (with PostgreSQL & Redis)
 ├── Web Dashboard
 ├── API authentication (API keys)
@@ -434,7 +434,7 @@ gantt
 
 ```
 v0.1.0 Release Package:
-├── Docker image (ghcr.io/rmyndharis/openwa:0.1.0)
+├── Docker image (ghcr.io/rmyndharis/whatsgate:0.1.0)
 ├── docker-compose.yml (production ready)
 ├── Full-featured Web Dashboard
 ├── Complete API documentation (Swagger)

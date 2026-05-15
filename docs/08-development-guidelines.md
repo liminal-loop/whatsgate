@@ -3,7 +3,7 @@
 ## 8.1 Project Structure
 
 ```
-openwa/
+whatsgate/
 ├── src/
 │   ├── main.ts                    # Application entry
 │   ├── app.module.ts              # Root module
@@ -712,8 +712,8 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
 ```bash
 # Required
-- Node.js 20 LTS
-- npm 10+
+- Node.js 26
+- npm 11+
 - Docker & Docker Compose
 - Git
 
@@ -727,11 +727,11 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
 ```bash
 # 1. Clone repository
-git clone https://github.com/rmyndharis/OpenWA.git
-cd openwa
+git clone https://github.com/rmyndharis/WhatsGate.git
+cd whatsgate
 
 # 2. Install dependencies
-npm install
+npm ci
 
 # 3. Copy environment file
 cp .env.example .env
@@ -739,10 +739,7 @@ cp .env.example .env
 # 4. Start infrastructure services
 docker compose up -d postgres redis
 
-# 5. Run database migrations
-npm run migration:run
-
-# 6. Start development server
+# 5. Start development server
 npm run start:dev
 ```
 
@@ -783,7 +780,7 @@ npm run start:dev
 
 ### Environment Variables
 
-OpenWA supports multiple infrastructure configurations. Choose based on your needs:
+WhatsGate supports multiple infrastructure configurations. Choose based on your needs:
 
 #### Minimal Profile (Development / Single Session)
 
@@ -797,7 +794,7 @@ LOG_LEVEL=debug
 
 # Database: SQLite (zero config)
 DATABASE_TYPE=sqlite
-DATABASE_SQLITE_PATH=./data/openwa.db
+DATABASE_SQLITE_PATH=./data/whatsgate.db
 
 # Storage: Local filesystem
 STORAGE_TYPE=local
@@ -834,7 +831,7 @@ LOG_LEVEL=info
 
 # Database: PostgreSQL
 DATABASE_TYPE=postgres
-DATABASE_URL=postgresql://openwa:openwa@localhost:5432/openwa
+DATABASE_URL=postgresql://whatsgate:whatsgate@localhost:5432/whatsgate
 
 # Storage: Local filesystem
 STORAGE_TYPE=local
@@ -1247,7 +1244,7 @@ docker compose logs app --tail 100
 **Solution:**
 ```dockerfile
 # Add shared memory size
-docker run --shm-size=2gb openwa
+docker run --shm-size=2gb whatsgate
 ```
 
 Or in docker-compose.yml:

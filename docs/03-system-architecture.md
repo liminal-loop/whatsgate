@@ -12,7 +12,7 @@ flowchart TB
         C3[n8n/Automation]
     end
     
-    subgraph OpenWA["OpenWA Platform"]
+    subgraph WhatsGate["WhatsGate Platform"]
         subgraph API["API Layer"]
             REST[REST API<br/>NestJS]
             WS[WebSocket<br/>Real-time]
@@ -76,7 +76,7 @@ sequenceDiagram
 
 ## 3.2 Pluggable Architecture Philosophy
 
-OpenWA is designed with a **Pluggable Architecture** that allows infrastructure components to be swapped without changing application code. This enables flexible deployments ranging from minimal single-session bots to enterprise-scale multi-tenant platforms.
+WhatsGate is designed with a **Pluggable Architecture** that allows infrastructure components to be swapped without changing application code. This enables flexible deployments ranging from minimal single-session bots to enterprise-scale multi-tenant platforms.
 
 ### Design Philosophy
 
@@ -214,7 +214,7 @@ export interface IAdapterLifecycle {
 
 ### Dependency Injection Configuration
 
-OpenWA uses NestJS Dynamic Modules for adapter injection:
+WhatsGate uses NestJS Dynamic Modules for adapter injection:
 
 ```typescript
 // adapters/adapters.module.ts
@@ -1235,13 +1235,13 @@ flowchart TB
 
 ## 3.13 Pluggable Adapters
 
-OpenWA uses the adapter pattern for infrastructure components that can be swapped per deployment needs. This allows users with limited resources to run OpenWA without heavyweight external dependencies.
+WhatsGate uses the adapter pattern for infrastructure components that can be swapped per deployment needs. This allows users with limited resources to run WhatsGate without heavyweight external dependencies.
 
 ### Adapter Overview
 
 ```mermaid
 flowchart TB
-    subgraph Core["OpenWA Core"]
+    subgraph Core["WhatsGate Core"]
         APP[Application Logic]
     end
 
@@ -1529,7 +1529,7 @@ export class StorageFactory {
 
 ### 3.13.2 Database Adapter
 
-OpenWA uses PostgreSQL as the single source of truth for all persisted application data.
+WhatsGate uses PostgreSQL as the single source of truth for all persisted application data.
 
 #### PostgreSQL Characteristics
 
@@ -1552,9 +1552,9 @@ export const getDatabaseConfig = (config: ConfigService): TypeOrmModuleOptions =
   type: 'postgres',
   host: config.get('database.host', 'localhost'),
   port: config.get('database.port', 5432),
-  username: config.get('database.username', 'openwa'),
+  username: config.get('database.username', 'whatsgate'),
   password: config.get('database.password'),
-  database: config.get('database.database', 'openwa'),
+  database: config.get('database.database', 'whatsgate'),
   entities: [__dirname + '/../**/*.entity{.ts,.js}'],
   migrations: [__dirname + '/../database/migrations/*{.ts,.js}'],
   synchronize: false,
@@ -1654,7 +1654,7 @@ export const getCacheConfig = async (
 
 ### 3.13.4 Deployment Profiles
 
-OpenWA provides several deployment profiles for different needs:
+WhatsGate provides several deployment profiles for different needs:
 
 ```mermaid
 flowchart LR
@@ -1693,7 +1693,7 @@ flowchart LR
 ```bash
 # Database
 DATABASE_TYPE=sqlite
-DATABASE_SQLITE_PATH=./data/openwa.db
+DATABASE_SQLITE_PATH=./data/whatsgate.db
 
 # Storage
 STORAGE_TYPE=local
@@ -1714,7 +1714,7 @@ MAX_SESSIONS=3
 ```bash
 # Database
 DATABASE_TYPE=postgres
-DATABASE_URL=postgresql://openwa:password@localhost:5432/openwa
+DATABASE_URL=postgresql://whatsgate:password@localhost:5432/whatsgate
 
 # Storage
 STORAGE_TYPE=local
@@ -1733,12 +1733,12 @@ MAX_SESSIONS=10
 ```bash
 # Database
 DATABASE_TYPE=postgres
-DATABASE_URL=postgresql://openwa:password@db-cluster:5432/openwa
+DATABASE_URL=postgresql://whatsgate:password@db-cluster:5432/whatsgate
 DATABASE_POOL_MAX=50
 
 # Storage
 STORAGE_TYPE=s3
-STORAGE_S3_BUCKET=openwa-media
+STORAGE_S3_BUCKET=whatsgate-media
 STORAGE_S3_REGION=ap-southeast-1
 STORAGE_S3_ACCESS_KEY_ID=xxx
 STORAGE_S3_SECRET_ACCESS_KEY=xxx
