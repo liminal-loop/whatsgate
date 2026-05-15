@@ -4,7 +4,6 @@ import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import type { Response } from 'supertest';
 import { App } from 'supertest/types';
-import { AppModule } from './../src/app.module';
 
 interface PostgresContainerInstance {
   getHost(): string;
@@ -41,8 +40,12 @@ describeIf('App (e2e, testcontainers)', () => {
     process.env.QUEUE_ENABLED = 'false';
     process.env.REDIS_ENABLED = 'false';
 
+    const { AppModule } = (await import('./../src/app.module')) as {
+      AppModule: unknown;
+    };
+
     const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
+      imports: [AppModule as Parameters<typeof Test.createTestingModule>[0]['imports'][number]],
     }).compile();
 
     app = moduleFixture.createNestApplication();
