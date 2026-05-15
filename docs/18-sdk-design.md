@@ -2,7 +2,7 @@
 
 ## 18.1 Overview
 
-OpenWA provides official SDKs for multiple programming languages to simplify API integration. This document describes the SDK design and specifications.
+WhatsGate provides official SDKs for multiple programming languages to simplify API integration. This document describes the SDK design and specifications.
 
 ### Supported Languages
 
@@ -43,21 +43,21 @@ flowchart TB
 
 ```bash
 # npm
-npm install @openwa/sdk
+npm install @whatsgate/sdk
 
 # yarn
-yarn add @openwa/sdk
+yarn add @whatsgate/sdk
 
 # pnpm
-pnpm add @openwa/sdk
+pnpm add @whatsgate/sdk
 ```
 
 ### Quick Start
 
 ```typescript
-import { OpenWA } from '@openwa/sdk';
+import { WhatsGate } from '@whatsgate/sdk';
 
-const client = new OpenWA({
+const client = new WhatsGate({
   baseUrl: 'http://localhost:2785',
   apiKey: 'your-api-key',
 });
@@ -94,7 +94,7 @@ client.on('session.status', async ({ sessionId, status }) => {
 ```typescript
 // src/index.ts
 
-export interface OpenWAConfig {
+export interface WhatsGateConfig {
   baseUrl: string;
   apiKey: string;
   timeout?: number;
@@ -102,8 +102,8 @@ export interface OpenWAConfig {
   debug?: boolean;
 }
 
-export class OpenWA extends EventEmitter {
-  private config: OpenWAConfig;
+export class WhatsGate extends EventEmitter {
+  private config: WhatsGateConfig;
   private http: HttpClient;
   private ws: WebSocketClient;
 
@@ -115,7 +115,7 @@ export class OpenWA extends EventEmitter {
   public webhooks: WebhooksResource;
   public apiKeys: ApiKeysResource;
 
-  constructor(config: OpenWAConfig) {
+  constructor(config: WhatsGateConfig) {
     super();
     this.config = this.validateConfig(config);
     this.http = new HttpClient(this.config);
@@ -419,7 +419,7 @@ export class MessageBuilder {
 ```typescript
 // src/events/index.ts
 
-export interface OpenWAEvents {
+export interface WhatsGateEvents {
   // Session events
   'session.status': (data: SessionStatusEvent) => void;
   'session.qr': (data: SessionQrEvent) => void;
@@ -454,7 +454,7 @@ export interface MessageAckEvent {
 }
 
 // Usage with typed events
-const client = new OpenWA({ ... });
+const client = new WhatsGate({ ... });
 
 client.on('message.received', ({ sessionId, message }) => {
   console.log(`[${sessionId}] New message from ${message.from}: ${message.body}`);
@@ -470,7 +470,7 @@ client.on('message.ack', ({ messageId, ack }) => {
 ```typescript
 // src/errors/index.ts
 
-export class OpenWAError extends Error {
+export class WhatsGateError extends Error {
   constructor(
     message: string,
     public code: string,
@@ -478,32 +478,32 @@ export class OpenWAError extends Error {
     public details?: unknown,
   ) {
     super(message);
-    this.name = 'OpenWAError';
+    this.name = 'WhatsGateError';
   }
 }
 
-export class ValidationError extends OpenWAError {
+export class ValidationError extends WhatsGateError {
   constructor(message: string, details?: unknown) {
     super(message, 'VALIDATION_ERROR', 400, details);
     this.name = 'ValidationError';
   }
 }
 
-export class AuthenticationError extends OpenWAError {
+export class AuthenticationError extends WhatsGateError {
   constructor(message = 'Invalid API key') {
     super(message, 'AUTHENTICATION_ERROR', 401);
     this.name = 'AuthenticationError';
   }
 }
 
-export class SessionNotFoundError extends OpenWAError {
+export class SessionNotFoundError extends WhatsGateError {
   constructor(sessionId: string) {
     super(`Session '${sessionId}' not found`, 'SESSION_NOT_FOUND', 404);
     this.name = 'SessionNotFoundError';
   }
 }
 
-export class RateLimitError extends OpenWAError {
+export class RateLimitError extends WhatsGateError {
   constructor(public retryAfter: number) {
     super(`Rate limited. Retry after ${retryAfter}ms`, 'RATE_LIMIT_EXCEEDED', 429);
     this.name = 'RateLimitError';
@@ -536,17 +536,17 @@ try {
 ### Installation
 
 ```bash
-pip install openwa-sdk
+pip install whatsgate-sdk
 ```
 
 ### Quick Start
 
 ```python
-from openwa import OpenWA
+from whatsgate import WhatsGate
 import asyncio
 
 async def main():
-    client = OpenWA(
+    client = WhatsGate(
         base_url="http://localhost:2785",
         api_key="your-api-key"
     )
@@ -573,7 +573,7 @@ asyncio.run(main())
 ### SDK Structure
 
 ```python
-# openwa/__init__.py
+# whatsgate/__init__.py
 
 from typing import Optional, List, Dict, Any
 from dataclasses import dataclass
@@ -608,7 +608,7 @@ class Message:
     status: Optional[str] = None
     is_from_me: bool = False
 
-class OpenWA:
+class WhatsGate:
     def __init__(
         self,
         base_url: str,
@@ -647,7 +647,7 @@ class OpenWA:
                 data = await response.json()
 
                 if not response.ok:
-                    raise OpenWAError(
+                    raise WhatsGateError(
                         message=data.get("error", {}).get("message", "Unknown error"),
                         code=data.get("error", {}).get("code", "UNKNOWN"),
                         status=response.status
@@ -660,7 +660,7 @@ class OpenWA:
 
 
 class SessionsResource:
-    def __init__(self, client: OpenWA):
+    def __init__(self, client: WhatsGate):
         self.client = client
 
     async def list(
@@ -721,7 +721,7 @@ class SessionsResource:
 
 
 class MessagesResource:
-    def __init__(self, client: OpenWA):
+    def __init__(self, client: WhatsGate):
         self.client = client
 
     async def send(
@@ -777,7 +777,7 @@ class MessagesResource:
         )
 
 
-class OpenWAError(Exception):
+class WhatsGateError(Exception):
     def __init__(self, message: str, code: str, status: int):
         super().__init__(message)
         self.code = code
@@ -787,16 +787,16 @@ class OpenWAError(Exception):
 ### Sync Wrapper
 
 ```python
-# openwa/sync.py
+# whatsgate/sync.py
 
-from .async_client import OpenWA as AsyncOpenWA
+from .async_client import WhatsGate as AsyncWhatsGate
 import asyncio
 
-class OpenWASync:
-    """Synchronous wrapper for OpenWA client"""
+class WhatsGateSync:
+    """Synchronous wrapper for WhatsGate client"""
 
     def __init__(self, **kwargs):
-        self._async_client = AsyncOpenWA(**kwargs)
+        self._async_client = AsyncWhatsGate(**kwargs)
         self._loop = asyncio.new_event_loop()
 
     def _run(self, coro):
@@ -833,9 +833,9 @@ class SessionsResourceSync:
 
 
 # Usage
-from openwa.sync import OpenWASync
+from whatsgate.sync import WhatsGateSync
 
-client = OpenWASync(base_url="http://localhost:2785", api_key="your-key")
+client = WhatsGateSync(base_url="http://localhost:2785", api_key="your-key")
 sessions = client.sessions.list()
 ```
 
@@ -844,7 +844,7 @@ sessions = client.sessions.list()
 ### Installation
 
 ```bash
-composer require openwa/sdk
+composer require whatsgate/sdk
 ```
 
 ### Quick Start
@@ -852,8 +852,8 @@ composer require openwa/sdk
 ```php
 <?php
 
-use OpenWA\Client;
-use OpenWA\Resources\Messages;
+use WhatsGate\Client;
+use WhatsGate\Resources\Messages;
 
 $client = new Client([
     'baseUrl' => 'http://localhost:2785',
@@ -882,15 +882,15 @@ echo "Message sent: " . $message->id;
 <?php
 // src/Client.php
 
-namespace OpenWA;
+namespace WhatsGate;
 
 use GuzzleHttp\Client as HttpClient;
-use OpenWA\Resources\Sessions;
-use OpenWA\Resources\Messages;
-use OpenWA\Resources\Contacts;
-use OpenWA\Resources\Groups;
-use OpenWA\Resources\Webhooks;
-use OpenWA\Exceptions\OpenWAException;
+use WhatsGate\Resources\Sessions;
+use WhatsGate\Resources\Messages;
+use WhatsGate\Resources\Contacts;
+use WhatsGate\Resources\Groups;
+use WhatsGate\Resources\Webhooks;
+use WhatsGate\Exceptions\WhatsGateException;
 
 class Client
 {
@@ -933,7 +933,7 @@ class Client
             $data = json_decode($response->getBody()->getContents(), true);
 
             if (!isset($data['success']) || !$data['success']) {
-                throw new OpenWAException(
+                throw new WhatsGateException(
                     $data['error']['message'] ?? 'Unknown error',
                     $data['error']['code'] ?? 'UNKNOWN',
                     $response->getStatusCode()
@@ -945,7 +945,7 @@ class Client
             $response = $e->getResponse();
             $data = json_decode($response->getBody()->getContents(), true);
 
-            throw new OpenWAException(
+            throw new WhatsGateException(
                 $data['error']['message'] ?? $e->getMessage(),
                 $data['error']['code'] ?? 'REQUEST_ERROR',
                 $response ? $response->getStatusCode() : 0
@@ -964,10 +964,10 @@ class Client
 <?php
 // src/Resources/Sessions.php
 
-namespace OpenWA\Resources;
+namespace WhatsGate\Resources;
 
-use OpenWA\Client;
-use OpenWA\Models\Session;
+use WhatsGate\Client;
+use WhatsGate\Models\Session;
 
 class Sessions
 {
@@ -1033,10 +1033,10 @@ class Sessions
 <?php
 // src/Resources/Messages.php
 
-namespace OpenWA\Resources;
+namespace WhatsGate\Resources;
 
-use OpenWA\Client;
-use OpenWA\Models\Message;
+use WhatsGate\Client;
+use WhatsGate\Models\Message;
 
 class Messages
 {
@@ -1123,33 +1123,33 @@ class Messages
 ### Installation
 
 ```bash
-npm install @rmyndharis/n8n-nodes-openwa
+npm install @rmyndharis/n8n-nodes-whatsgate
 ```
 
 ### Node Configuration
 
 ```typescript
-// nodes/OpenWA/OpenWA.node.ts
+// nodes/WhatsGate/WhatsGate.node.ts
 
 import { IExecuteFunctions, INodeExecutionData, INodeType, INodeTypeDescription } from 'n8n-workflow';
 
-export class OpenWA implements INodeType {
+export class WhatsGate implements INodeType {
   description: INodeTypeDescription = {
-    displayName: 'OpenWA',
-    name: 'openWA',
-    icon: 'file:openwa.svg',
+    displayName: 'WhatsGate',
+    name: 'whatsGate',
+    icon: 'file:whatsgate.svg',
     group: ['transform'],
     version: 1,
     subtitle: '={{$parameter["operation"] + ": " + $parameter["resource"]}}',
-    description: 'Send WhatsApp messages via OpenWA',
+    description: 'Send WhatsApp messages via WhatsGate',
     defaults: {
-      name: 'OpenWA',
+      name: 'WhatsGate',
     },
     inputs: ['main'],
     outputs: ['main'],
     credentials: [
       {
-        name: 'openWAApi',
+        name: 'whatsGateApi',
         required: true,
       },
     ],
@@ -1265,7 +1265,7 @@ export class OpenWA implements INodeType {
   async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
     const items = this.getInputData();
     const returnData: INodeExecutionData[] = [];
-    const credentials = await this.getCredentials('openWAApi');
+    const credentials = await this.getCredentials('whatsGateApi');
 
     const baseUrl = credentials.baseUrl as string;
     const apiKey = credentials.apiKey as string;
@@ -1333,26 +1333,26 @@ export class OpenWA implements INodeType {
 ### Trigger Node
 
 ```typescript
-// nodes/OpenWA/OpenWATrigger.node.ts
+// nodes/WhatsGate/WhatsGateTrigger.node.ts
 
 import { IHookFunctions, IWebhookFunctions, INodeType, INodeTypeDescription, IWebhookResponseData } from 'n8n-workflow';
 
-export class OpenWATrigger implements INodeType {
+export class WhatsGateTrigger implements INodeType {
   description: INodeTypeDescription = {
-    displayName: 'OpenWA Trigger',
-    name: 'openWATrigger',
-    icon: 'file:openwa.svg',
+    displayName: 'WhatsGate Trigger',
+    name: 'whatsGateTrigger',
+    icon: 'file:whatsgate.svg',
     group: ['trigger'],
     version: 1,
-    description: 'Starts workflow on OpenWA events',
+    description: 'Starts workflow on WhatsGate events',
     defaults: {
-      name: 'OpenWA Trigger',
+      name: 'WhatsGate Trigger',
     },
     inputs: [],
     outputs: ['main'],
     credentials: [
       {
-        name: 'openWAApi',
+        name: 'whatsGateApi',
         required: true,
       },
     ],
@@ -1391,9 +1391,9 @@ export class OpenWATrigger implements INodeType {
   webhookMethods = {
     default: {
       async checkExists(this: IHookFunctions): Promise<boolean> {
-        // Check if webhook already exists in OpenWA
+        // Check if webhook already exists in WhatsGate
         const webhookUrl = this.getNodeWebhookUrl('default');
-        const credentials = await this.getCredentials('openWAApi');
+        const credentials = await this.getCredentials('whatsGateApi');
 
         const sessionId = this.getNodeParameter('sessionFilter') as string;
         const response = await this.helpers.request({
@@ -1409,7 +1409,7 @@ export class OpenWATrigger implements INodeType {
       async create(this: IHookFunctions): Promise<boolean> {
         const webhookUrl = this.getNodeWebhookUrl('default');
         const events = this.getNodeParameter('events') as string[];
-        const credentials = await this.getCredentials('openWAApi');
+        const credentials = await this.getCredentials('whatsGateApi');
 
         const sessionId = this.getNodeParameter('sessionFilter') as string;
         await this.helpers.request({
@@ -1428,7 +1428,7 @@ export class OpenWATrigger implements INodeType {
 
       async delete(this: IHookFunctions): Promise<boolean> {
         const webhookUrl = this.getNodeWebhookUrl('default');
-        const credentials = await this.getCredentials('openWAApi');
+        const credentials = await this.getCredentials('whatsGateApi');
 
         // Find and delete the webhook
         const sessionId = this.getNodeParameter('sessionFilter') as string;

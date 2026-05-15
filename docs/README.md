@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="logo/openwa_logo.webp" alt="WhatsGate Logo" width="200"/>
+  <img src="logo/whatsgate_brand.svg" alt="WhatsGate Logo" width="360"/>
 </p>
 
 <h1 align="center">WhatsGate Documentation</h1>
@@ -101,7 +101,7 @@ Access:
 
 ### API Key
 
-OpenWA seeds a default API key on first run and writes it to:
+WhatsGate seeds a default API key on first run and writes it to:
 
 - `data/.api-key` (development)
 
@@ -128,7 +128,7 @@ curl http://localhost:2785/api/sessions/{sessionId}/qr \
 curl -X POST http://localhost:2785/api/sessions/{sessionId}/messages/send-text \
   -H "X-API-Key: your-api-key" \
   -H "Content-Type: application/json" \
-  -d '{"chatId": "628123456789@c.us", "text": "Hello from OpenWA!"}'
+  -d '{"chatId": "628123456789@c.us", "text": "Hello from WhatsGate!"}'
 ```
 
 ## WebSocket Example (Socket.IO)
@@ -193,7 +193,7 @@ socket.on('message', msg => {
 ## Project Structure
 
 ```
-OpenWA/
+WhatsGate/
 ├── src/                    # Backend source code
 ├── dashboard/              # Frontend dashboard
 ├── docker-compose.yml      # Traefik + API + Dashboard
@@ -216,6 +216,6 @@ MIT License.
 
 **Start Reading: [01 - Project Overview](./01-project-overview.md)**
 
-_OpenWA Documentation · Last updated: 2026-02-05_
+_WhatsGate Documentation · Last updated: 2026-02-05_
 
 </div>

@@ -18,7 +18,7 @@
 
 | Component | Status | Notes |
 |-----------|--------|-------|
-| **@openwa/plugin-sdk** | 🔜 Planned | NPM package not yet published |
+| **@whatsgate/plugin-sdk** | 🔜 Planned | NPM package not yet published |
 | **Sandboxed execution** | 🔜 Planned | vm2 isolation not implemented |
 | **Permission enforcement** | ⚠️ Partial | Defined in manifest, not enforced |
 | **Built-in plugins** | 🔜 Planned | Auto-reply, Translation examples |
@@ -28,7 +28,7 @@
 
 ## 19.1 Overview
 
-The plugin architecture enables OpenWA extensibility without modifying the core codebase. Plugins can add new features, integrate with external services, or customize behavior.
+The plugin architecture enables WhatsGate extensibility without modifying the core codebase. Plugins can add new features, integrate with external services, or customize behavior.
 
 ### Design Goals
 
@@ -109,14 +109,14 @@ plugins/
 {
   "name": "my-awesome-plugin",
   "version": "1.0.0",
-  "description": "An awesome plugin for OpenWA",
+  "description": "An awesome plugin for WhatsGate",
   "author": "Your Name",
   "license": "MIT",
 
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
 
-  "openwa": {
+  "whatsgate": {
     "minVersion": "0.2.0",
     "maxVersion": "2.0.0"
   },
@@ -167,7 +167,7 @@ plugins/
 ```typescript
 // plugins/my-plugin/index.ts
 
-import { OpenWAPlugin, PluginContext, MessageEvent, HookResult } from '@openwa/plugin-sdk';
+import { WhatsGatePlugin, PluginContext, MessageEvent, HookResult } from '@whatsgate/plugin-sdk';
 
 export interface MyPluginConfig {
   enabled: boolean;
@@ -178,7 +178,7 @@ export interface MyPluginConfig {
   };
 }
 
-export default class MyAwesomePlugin implements OpenWAPlugin<MyPluginConfig> {
+export default class MyAwesomePlugin implements WhatsGatePlugin<MyPluginConfig> {
   name = 'my-awesome-plugin';
   version = '1.0.0';
 
@@ -265,9 +265,9 @@ export default class MyAwesomePlugin implements OpenWAPlugin<MyPluginConfig> {
 ### Core Interfaces
 
 ```typescript
-// @openwa/plugin-sdk/types.ts
+// @whatsgate/plugin-sdk/types.ts
 
-export interface OpenWAPlugin<TConfig = any> {
+export interface WhatsGatePlugin<TConfig = any> {
   name: string;
   version: string;
 
@@ -336,7 +336,7 @@ export interface HookResult {
 ### Plugin API
 
 ```typescript
-// @openwa/plugin-sdk/api.ts
+// @whatsgate/plugin-sdk/api.ts
 
 export interface PluginAPI {
   // Sessions (requires: sessions:read/write)
@@ -380,7 +380,7 @@ export interface PluginAPI {
 ### Plugin Storage
 
 ```typescript
-// @openwa/plugin-sdk/storage.ts
+// @whatsgate/plugin-sdk/storage.ts
 
 export interface PluginStorage {
   // Key-value storage (scoped to plugin)
@@ -405,7 +405,7 @@ export interface PluginStorage {
 
 ```mermaid
 sequenceDiagram
-    participant Core as OpenWA Core
+    participant Core as WhatsGate Core
     participant HM as Hook Manager
     participant P1 as Plugin 1
     participant P2 as Plugin 2
@@ -521,7 +521,7 @@ export interface HookExecutionResult<T> {
 ```typescript
 // src/core/plugins/plugin-loader.ts
 
-import { OpenWAPlugin, PluginContext, PluginManifest } from './types';
+import { WhatsGatePlugin, PluginContext, PluginManifest } from './types';
 import { HookManager } from '../hooks/hook-manager';
 import { PluginSandbox } from './plugin-sandbox';
 import { PluginStorageImpl } from './plugin-storage';
@@ -682,7 +682,7 @@ export class PluginLoader {
 }
 
 interface LoadedPlugin {
-  instance: OpenWAPlugin;
+  instance: WhatsGatePlugin;
   manifest: PluginManifest;
   context: PluginContext;
   config: any;
@@ -696,7 +696,7 @@ interface LoadedPlugin {
 ```typescript
 // plugins/auto-reply/index.ts
 
-import { OpenWAPlugin, PluginContext, MessageEvent } from '@openwa/plugin-sdk';
+import { WhatsGatePlugin, PluginContext, MessageEvent } from '@whatsgate/plugin-sdk';
 
 interface AutoReplyConfig {
   enabled: boolean;
@@ -711,7 +711,7 @@ interface AutoReplyRule {
   matchType: 'exact' | 'contains' | 'regex' | 'startsWith';
 }
 
-export default class AutoReplyPlugin implements OpenWAPlugin<AutoReplyConfig> {
+export default class AutoReplyPlugin implements WhatsGatePlugin<AutoReplyConfig> {
   name = 'auto-reply';
   version = '1.0.0';
 
@@ -812,7 +812,7 @@ interface CompiledRule extends AutoReplyRule {
 ```typescript
 // plugins/translation/index.ts
 
-import { OpenWAPlugin, PluginContext, MessageEvent } from '@openwa/plugin-sdk';
+import { WhatsGatePlugin, PluginContext, MessageEvent } from '@whatsgate/plugin-sdk';
 
 interface TranslationConfig {
   enabled: boolean;
@@ -824,7 +824,7 @@ interface TranslationConfig {
   translateOutgoing: boolean;
 }
 
-export default class TranslationPlugin implements OpenWAPlugin<TranslationConfig> {
+export default class TranslationPlugin implements WhatsGatePlugin<TranslationConfig> {
   name = 'translation';
   version = '1.0.0';
 

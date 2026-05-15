@@ -251,6 +251,98 @@ describe('SessionService', () => {
         expect.any(Object),
       );
     });
+
+    it('should dispatch webhook and emit event when message hook returns continue=true', async () => {
+      const session = createMockSession();
+      (repository.findOne as jest.Mock).mockResolvedValue(session);
+      (repository.update as jest.Mock).mockResolvedValue({ affected: 1 });
+
+      (hookManager.execute as jest.Mock).mockImplementation((eventName: string, payload: unknown) => {
+        if (eventName === 'message:received') {
+          return Promise.resolve({
+            continue: true,
+            data: { ...(payload as Record<string, unknown>), text: 'modified-by-hook' },
+          });
+        }
+        return Promise.resolve({ continue: true, data: payload });
+      });
+
+      await service.start('sess-uuid-1');
+
+      const initializeCalls = mockEngine.initialize.mock.calls as Array<
+        [
+          {
+            onMessage: (message: { id: string; from: string; body?: string }) => void;
+          },
+        ]
+      >;
+      const callbacks = initializeCalls[0]?.[0] as
+        | {
+            onMessage: (message: { id: string; from: string; body?: string }) => void;
+          }
+        | undefined;
+
+      expect(callbacks).toBeDefined();
+      if (!callbacks) {
+        throw new Error('Expected initialize callback to be registered');
+      }
+
+      const engineCallbacks = callbacks;
+
+      engineCallbacks.onMessage({ id: 'msg-1', from: '6281111111@c.us', body: 'hello' });
+      await Promise.resolve();
+
+      expect(webhookService.dispatch).toHaveBeenCalledWith(
+        'sess-uuid-1',
+        'message.received',
+        expect.objectContaining({ id: 'msg-1', text: 'modified-by-hook' }),
+      );
+      expect(eventsGateway.emitMessage).toHaveBeenCalledWith(
+        'sess-uuid-1',
+        expect.objectContaining({ id: 'msg-1', text: 'modified-by-hook' }),
+      );
+    });
+
+    it('should stop message processing when message hook returns continue=false', async () => {
+      const session = createMockSession();
+      (repository.findOne as jest.Mock).mockResolvedValue(session);
+      (repository.update as jest.Mock).mockResolvedValue({ affected: 1 });
+
+      (hookManager.execute as jest.Mock).mockImplementation((eventName: string, payload: unknown) => {
+        if (eventName === 'message:received') {
+          return Promise.resolve({ continue: false, data: payload });
+        }
+        return Promise.resolve({ continue: true, data: payload });
+      });
+
+      await service.start('sess-uuid-1');
+
+      const initializeCalls = mockEngine.initialize.mock.calls as Array<
+        [
+          {
+            onMessage: (message: { id: string; from: string }) => void;
+          },
+        ]
+      >;
+      const callbacks = initializeCalls[0]?.[0] as
+        | {
+            onMessage: (message: { id: string; from: string }) => void;
+          }
+        | undefined;
+
+      expect(callbacks).toBeDefined();
+      if (!callbacks) {
+        throw new Error('Expected initialize callback to be registered');
+      }
+
+      const engineCallbacks = callbacks;
+
+      engineCallbacks.onMessage({ id: 'msg-2', from: '6282222222@c.us' });
+      await Promise.resolve();
+
+      expect(webhookService.dispatch).not.toHaveBeenCalled();
+      expect(eventsGateway.emitMessage).not.toHaveBeenCalled();
+    });
   });
 
   // ── stop ──────────────────────────────────────────────────────────
